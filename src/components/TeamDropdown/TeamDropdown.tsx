@@ -21,11 +21,11 @@ const TeamDropdown: React.FC<TeamDropdownProps> = ({
   const [teams, setTeams] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const apiUrl = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:5000/teams");
+        const response = await axios.get(`${apiUrl}/teams`);
         setTeams(response.data);
       } catch (error) {
         setError("Failed to fetch teams. Please try again later.");

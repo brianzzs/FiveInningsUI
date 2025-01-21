@@ -29,11 +29,14 @@ const StatsPage: React.FC = () => {
     const [over2_5F5, setOver2_5F5] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+
     const handleCalculate = async () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                `http://127.0.0.1:5000/stats/${selectedTeam}/${selectedPeriod}`
+                `${apiUrl}/stats/${selectedTeam}/${selectedPeriod}`
             );
 
             const { results, win_percentage, nrfi, over1_5F5, over2_5F5 } =
@@ -60,14 +63,14 @@ const StatsPage: React.FC = () => {
         <Flex
             direction="column"
             minHeight="100vh"
-            width="100vw" 
+            width="100vw"
             bg="#1a202c"
         >
             <Flex
                 as="header"
                 justify="space-between"
                 align="center"
-                w="100%" 
+                w="100%"
                 px={8}
                 py={4}
                 bg="teal.600"

@@ -45,7 +45,7 @@ const TodaySchedule: React.FC<TodayScheduleProps> = ({ setIsLoading }) => {
 
     const [gamesData, setGamesData] = React.useState<Game[]>([]);
     const [error, setError] = React.useState<string | null>(null);
-
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     React.useEffect(() => {
         fetchTodaySchedule();
@@ -66,7 +66,7 @@ const TodaySchedule: React.FC<TodayScheduleProps> = ({ setIsLoading }) => {
             return;
         }
         setIsLoading(true);
-        await axios.get<Game[]>("http://127.0.0.1:5000/schedule_today")
+        await axios.get<Game[]>(`${apiUrl}/schedule_today`)
             .then((response) => {
                 setGamesData(response.data);
                 saveScheduleToStorage(response.data);

@@ -69,8 +69,10 @@ class NextScheduledGame extends React.Component<
 
     this.setState({ isLoading: true, error: null });
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+
     axios
-      .get(`http://127.0.0.1:5000/schedule/${teamId}`)
+      .get(`${apiUrl}/schedule/${teamId}`)
       .then((response) => {
         const gameData = response.data;
         this.setState({ gameData, isLoading: false });
