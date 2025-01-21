@@ -1,1 +1,1 @@
-/api/*  https://fiveinnings-api-f6d1667b55fe.herokuapp.com/api/:splat  200
+/api/*  https://fiveinnings-api-f6d1667b55fe.herokuapp.com/:splat  200
