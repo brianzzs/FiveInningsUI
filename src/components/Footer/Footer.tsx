@@ -29,7 +29,7 @@ const FooterComponent: React.FC<FooterComponentProps> = ({ isLoading }) => {
     >
       <Text textAlign="center">
         <Text as="span" fontWeight="bold" color="teal.400">
-          Five Innings Friend
+          Five Innings
         </Text>{" "}
         - © {new Date().getFullYear()} All Rights Reserved | Made by{" "}
         <Link
