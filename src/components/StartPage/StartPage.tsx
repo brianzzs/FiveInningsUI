@@ -8,34 +8,44 @@ import {
     Text,
     Button,
     VStack,
-    HStack,
     Link as ChakraLink,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import TodaySchedule from "../TodaySchedule/TodaySchedule";
 import FooterComponent from "../Footer/Footer";
-import Bg from "../../img/bg.jpg";
+import Bg from "../../img/bg2.webp";
 
 const StartPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     return (
-        <Box position="relative" minHeight="100vh" bg="#253750">
-            {/* Header */}
+        <Box
+            position="relative"
+            minHeight="100vh"
+            bg="#1A202C" // Dark gray background
+            width="100%"
+        >
+            {/* Navigation Bar */}
             <Flex
                 as="nav"
                 justify="space-between"
                 align="center"
                 p="1rem 2rem"
-                bg="#152643"
+                bg="#2D3748" // Slightly lighter gray for contrast
                 position="fixed"
                 top={0}
                 left={0}
                 right={0}
                 zIndex={100}
             >
-                <Heading as="h1" size="lg" color="white">
-                    Five Innings Friend
+                <Heading
+                    as="h1"
+                    size="lg"
+                    color="white"
+                    fontFamily="Poppins, sans-serif"
+                    fontWeight="700"
+                >
+                    Five Innings
                 </Heading>
                 <ChakraLink
                     as={Link}
@@ -43,85 +53,95 @@ const StartPage: React.FC = () => {
                     textDecoration="none"
                     color="white"
                     fontSize="lg"
+                    fontFamily="Roboto, sans-serif"
                 >
                     Statistics
                 </ChakraLink>
             </Flex>
 
-            {/* Background Image */}
-            <Box
-                backgroundImage={`linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(${Bg})`}
-                backgroundSize="cover"
-                backgroundPosition="center"
-                backgroundRepeat="no-repeat"
-                position="absolute"
-                top={0}
-                left={0}
-                right={0}
-                bottom={0}
-                zIndex={-2}
-            />
-
-            {/* Content */}
+            {/* Content Section */}
             <Grid
                 templateColumns="repeat(12, 1fr)"
                 gap={4}
                 mt="4rem"
-                fontFamily="Poppins"
-                fontWeight="400"
-                pb="60px" /* Add padding to prevent overlap with footer */
+                pb="60px"
+                w="100%"
+                h="100vh"
+                background={`linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(${Bg})`}
+                backgroundSize="cover"
+                backgroundPosition="center"
+                backgroundRepeat="no-repeat"
             >
-                {/* Hero Section */}
-                <GridItem colSpan={12} mt="4rem">
-                    <VStack spacing={6} align="center" textAlign="center">
+                <GridItem colSpan={12} mt="4rem" w="100%">
+                    <VStack spacing={6} align="center" textAlign="center" px="2rem">
+                        {/* Headline */}
                         <Heading
                             as="h2"
-                            fontSize={["2xl", "4xl", "6xl"]}
-                            color="#F3F4F6"
-                            textAlign="center"
-                            mb={4}
+                            fontSize={["3xl", "4xl", "5xl"]}
+                            color="#F59E0B" // Golden yellow for emphasis
+                            fontFamily="Poppins, sans-serif"
+                            fontWeight="700"
                         >
-                            Unlock the Power of BETTING with Data!
+                            Bet Smarter, Win Bigger!
                         </Heading>
-                        <Text color="#9CA3AF" fontSize={["md", "lg"]} mb={6}>
-                            Our comprehensive statistics provide detailed insights for those
-                            who love to bet on First 5 Innings including:
+
+                        {/* Subheadline */}
+                        <Text
+                            color="whiteAlpha.800"
+                            fontSize={["md", "lg"]}
+                            fontFamily="Roboto, sans-serif"
+                            mb={6}
+                        >
+                            Unlock data-driven insights for the First 5 Innings to gain the edge
+                            you need.
                         </Text>
-                        <VStack align="flex-start" color="white" spacing={2}>
-                            <Text>- Over 1.5 Runs</Text>
-                            <Text>- Over 2.5 Runs</Text>
-                            <Text>- No Run First Inning %</Text>
+
+                        {/* Features List */}
+                        <VStack
+                            align="center"
+                            spacing={2}
+                            color="white"
+                            fontSize={["sm", "md"]}
+                            fontFamily="Roboto, sans-serif"
+                        >
+                            <Text>- Over 1.5 and 2.5 Runs Analysis</Text>
+                            <Text>- No Run First Inning Statistics</Text>
                             <Text>- First 5 Innings Money Line</Text>
-                            <Text>
-                                - Game History for 5 innings up to the last{" "}
-                                <strong>30 Days</strong>
-                            </Text>
+                            <Text>- 30-Day Game History</Text>
                         </VStack>
+
+                        {/* Call-to-Action */}
                         <VStack spacing={4}>
-                            <Text color="white" fontSize={["md", "lg"]}>
-                                Empower your betting decision-making with our data-driven
-                                approach. Ready to out-smart the bookies?
+                            <Text
+                                color="white"
+                                fontSize={["md", "lg"]}
+                                fontFamily="Roboto, sans-serif"
+                            >
+                                Make informed decisions and outsmart the competition today!
                             </Text>
                             <ChakraLink as={Link} to="/stats" textDecoration="none">
                                 <Button
-                                    bg="#F59E0B"
+                                    bg="#38B2AC" // Teal for an energetic look
                                     _hover={{
-                                        bg: "#D97706",
+                                        bg: "#2C7A7B",
                                         boxShadow: "0px 10px 15px rgba(0, 0, 0, 0.2)",
                                     }}
                                     borderRadius="30px"
                                     size="lg"
+                                    px="2rem"
                                     color="white"
+                                    fontFamily="Poppins, sans-serif"
+                                    fontWeight="600"
                                 >
-                                    EXPLORE
+                                    Get Started
                                 </Button>
                             </ChakraLink>
                         </VStack>
                     </VStack>
                 </GridItem>
 
-                {/* Schedule Section */}
-                <GridItem colSpan={12}>
+                {/* Today's Schedule Section */}
+                <GridItem colSpan={12} w="100%">
                     <Flex
                         justify="center"
                         align="center"
@@ -129,25 +149,12 @@ const StartPage: React.FC = () => {
                         p="1rem"
                         bg="linear-gradient(135deg, #1E1E2F 0%, #2E3A59 100%)"
                     >
-                        <TodaySchedule
-                            placeholder={
-                                <Box
-                                    display="flex"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    height="50vh"
-                                >
-                                    <Text color="white" fontSize="lg">
-                                        Loading today's schedule...
-                                    </Text>
-                                </Box>
-                            }
-                            setIsLoading={setIsLoading}
-                        />
+                        <TodaySchedule isLoading={isLoading} setIsLoading={setIsLoading} />
                     </Flex>
                 </GridItem>
             </Grid>
 
+            {/* Footer */}
             <FooterComponent isLoading={isLoading} />
         </Box>
     );

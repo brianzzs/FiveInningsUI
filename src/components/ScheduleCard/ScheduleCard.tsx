@@ -71,11 +71,13 @@ const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
                         borderRadius="md"
                         shadow="md"
                         textAlign="center"
-                        bg={"#113f67"}
+                        bg={"#2D3748"}
+                        _hover={{ transform: "scale(1.05)" }}
+
                     >
                         <Flex direction={{ base: "column", md: "row" }} justify="space-between" mb={4}>
                             <Card flexDirection={"row"} overflow={"hidden"} alignItems={"center"} maxW={"x1"}
-                                bg={"#113f67"} fontStyle={"normal"} color={"#f5f5f5"} p={4} borderRadius={"md"}
+                                bg={"#2D3748"} fontStyle={"normal"} color={"#f5f5f5"} p={4} borderRadius={"md"}
                                 fontFamily={"Inter"} borderColor={"#f5f5f5"} borderWidth={0.5} boxShadow={"md"}>
                                 <VStack spacing={4}>
                                     <TeamLogo teamId={game.away_team.id} />

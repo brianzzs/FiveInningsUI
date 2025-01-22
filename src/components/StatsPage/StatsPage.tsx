@@ -81,7 +81,7 @@ const StatsPage: React.FC = () => {
             >
                 <Link to="/">
                     <Heading as="h1" size="lg" fontWeight="bold">
-                        Five Innings Friend
+                        Five Innings
                     </Heading>
                 </Link>
             </Flex>
