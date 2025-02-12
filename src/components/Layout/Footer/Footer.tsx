@@ -18,7 +18,7 @@ const FooterComponent: React.FC<FooterComponentProps> = ({ isLoading }) => {
       alignItems="center"
       bg="gray.800"
       color="gray.300"
-      position="fixed"
+      position="sticky"
       bottom={0}
       width="100%"
       height="60px"
@@ -33,7 +33,7 @@ const FooterComponent: React.FC<FooterComponentProps> = ({ isLoading }) => {
         </Text>{" "}
         - © {new Date().getFullYear()} All Rights Reserved | Made by{" "}
         <Link
-          href="https://www.linkedin.com/in/brian-zanoni"
+          href="https://www.linkedin.com/in/brianzan/"
           isExternal
           color="teal.400"
           fontWeight="bold"

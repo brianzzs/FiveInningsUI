@@ -1,4 +1,5 @@
 import React from "react";
+import { Game } from "../../types/Game";
 import {
     Box,
     Grid,
@@ -15,20 +16,7 @@ import {
     CardHeader,
 } from "@chakra-ui/react";
 
-interface Team {
-    id: number;
-    name: string;
-    probable_pitcher: {
-        name: string;
-    };
-    runs: number[];
-    total_runs: number;
-}
 
-interface Game {
-    away_team: Team;
-    home_team: Team;
-}
 
 interface ResultsTableProps {
     data: Game[];
