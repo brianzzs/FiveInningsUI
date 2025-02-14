@@ -15,8 +15,7 @@ import {
     CardBody,
     CardHeader,
 } from "@chakra-ui/react";
-
-
+import { getTeamAbbreviation } from '../../constants/teams';
 
 interface ResultsTableProps {
     data: Game[];
@@ -98,7 +97,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                                                 fontWeight="bold"
                                                 color={displayedTeamId === game.away_team.id ? "#ffa000" : "white"}
                                             >
-                                                {game.away_team.name}
+                                                {getTeamAbbreviation(game.away_team.name)}
                                                 <Text as="span" fontSize="sm" ml={1} color="gray.400">
                                                     ({game.away_team.probable_pitcher.name})
                                                 </Text>
@@ -123,7 +122,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                                                 fontWeight="bold"
                                                 color={displayedTeamId === game.home_team.id ? "#ffa000" : "white"}
                                             >
-                                                {game.home_team.name}
+                                                {getTeamAbbreviation(game.home_team.name)}
                                                 <Text as="span" fontSize="sm" ml={1} color="gray.400">
                                                     ({game.home_team.probable_pitcher.name})
                                                 </Text>

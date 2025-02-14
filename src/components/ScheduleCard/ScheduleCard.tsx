@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
     Box,
@@ -6,15 +5,14 @@ import {
     Text,
     Button,
     SimpleGrid,
-    Spinner,
     VStack,
     HStack,
     Card,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { MdPerson, MdAccessTime, MdOutlineReceiptLong, MdSportsBaseball } from "react-icons/md";
-import axios from "axios";
 import TeamLogo from "../TeamLogo/TeamLogo";
+import { getTeamAbbreviation } from '../../constants/teams';
 
 interface Team {
     id: number;
@@ -83,7 +81,7 @@ const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
                                     <TeamLogo teamId={game.away_team.id} />
                                 </VStack>
                                 <Text fontSize="lg" fontWeight={"bold"}>
-                                    {game.away_team.name}{" "}
+                                    {getTeamAbbreviation(game.away_team.name)}
                                 </Text>
                                 <Text fontSize="lg" fontWeight={"bold"} alignSelf={"center"}>
                                     ({game.away_team.wins}-{game.away_team.losses})
@@ -97,7 +95,7 @@ const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
                                     </Text>
 
                                     <Text fontSize="lg" fontWeight={"bold"} alignSelf={"center"}>
-                                        {game.home_team.name}{" "}
+                                        {getTeamAbbreviation(game.home_team.name)}
                                     </Text>
                                     <VStack spacing={4}>
                                         <TeamLogo teamId={game.home_team.id} />

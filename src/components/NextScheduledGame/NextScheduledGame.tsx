@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import { FaUser, FaChartLine, FaBaseballBall, FaClock } from "react-icons/fa";
 import TeamLogo from "../TeamLogo/TeamLogo";
+import { getTeamAbbreviation } from '../../constants/teams';
 
 interface Team {
   id: number;
@@ -134,7 +135,7 @@ class NextScheduledGame extends React.Component<
                   <TeamLogo teamId={scheduledGame.away_team.id} />
                   <VStack align="start" ml={4}>
                     <Text fontSize="lg" fontWeight="bold">
-                      {scheduledGame.away_team.name}
+                      {getTeamAbbreviation(scheduledGame.away_team.name)}
                     </Text>
                     <Text fontSize="sm">
                       ({scheduledGame.away_team.wins}-{scheduledGame.away_team.losses})
@@ -147,7 +148,7 @@ class NextScheduledGame extends React.Component<
                 <Flex align="center">
                   <VStack align="end" mr={4}>
                     <Text fontSize="lg" fontWeight="bold">
-                      {scheduledGame.home_team.name}
+                      {getTeamAbbreviation(scheduledGame.home_team.name)}
                     </Text>
                     <Text fontSize="sm">
                       ({scheduledGame.home_team.wins}-{scheduledGame.home_team.losses})
