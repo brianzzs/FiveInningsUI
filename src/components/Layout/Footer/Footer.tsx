@@ -18,7 +18,7 @@ const FooterComponent: React.FC<FooterComponentProps> = ({ isLoading }) => {
       alignItems="center"
       bg="gray.800"
       color="gray.300"
-      position="sticky"
+      position="fixed"
       bottom={0}
       width="100%"
       height="60px"

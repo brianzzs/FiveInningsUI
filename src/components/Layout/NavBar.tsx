@@ -2,6 +2,8 @@ import React from 'react';
 import { Flex, Heading, Link as ChakraLink } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { ROUTES, THEME } from '../../constants';
+import { Icon } from '@chakra-ui/react';
+import { FaBaseballBall } from 'react-icons/fa';
 
 export const NavBar: React.FC = () => (
     <Flex
@@ -15,19 +17,29 @@ export const NavBar: React.FC = () => (
         left={0}
         right={0}
         zIndex={100}
+        borderBottom="1px solid"
+        borderColor="gray.700"
+        boxShadow="0 2px 10px rgba(0,0,0,0.3)"
     >
         <Heading
             as="h1"
             size="lg"
             color="white"
             fontFamily={THEME.fonts.heading}
-            fontWeight="700"
+            fontWeight="800"
         >
             <ChakraLink
                 as={Link}
                 to={ROUTES.HOME}
-                _hover={{textDecoration: 'none', color: THEME.colors.primary}}
-            >Five Innings
+                _hover={{
+                    textDecoration: 'none',
+                    color: THEME.colors.accent
+                }}
+                display="flex"
+                alignItems="center"
+            >
+                <Icon as={FaBaseballBall} mr={2} color={THEME.colors.accent} />
+                Five Innings
             </ChakraLink>
         </Heading>
         <ChakraLink
@@ -36,7 +48,12 @@ export const NavBar: React.FC = () => (
             color="white"
             fontSize="lg"
             fontFamily={THEME.fonts.body}
-            _hover={{ textDecoration: 'none', color: THEME.colors.primary }}
+            fontWeight="500"
+            _hover={{ 
+                textDecoration: 'none', 
+                color: THEME.colors.accent
+            }}
+            transition="all 0.2s"
         >
             Statistics
         </ChakraLink>

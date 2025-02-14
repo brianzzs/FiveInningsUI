@@ -6,15 +6,15 @@ import TodaySchedule from '../../components/TodaySchedule/TodaySchedule';
 import FooterComponent from '../../components/Layout/Footer/Footer';
 import { ROUTES, THEME } from '../../constants';
 import backgroundImage from '../../img/bg2.webp';
+import { FaChartLine } from 'react-icons/fa';
+import { Icon } from '@chakra-ui/react';
 
 export const StartPage: React.FC = () => {
     const [isLoading, setIsLoading] = React.useState(true);
 
     return (
-        <Box position="relative" minHeight="100vh" bg={THEME.colors.background}
-            width="100%">
+        <Box position="relative" minHeight="100vh" bg={THEME.colors.background} width="100%">
             <NavBar />
-
             <Grid
                 templateColumns="repeat(12, 1fr)"
                 gap={4}
@@ -24,56 +24,63 @@ export const StartPage: React.FC = () => {
                 w="100%"
                 background={`linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(${backgroundImage})`}
                 backgroundSize="cover"
-                backgroundPosition="center 20%"
+                backgroundPosition="left 20%"
                 backgroundRepeat="no-repeat"
             >
                 <GridItem colSpan={12} mt="4rem">
                     <VStack spacing={8} align="center" px="2rem">
                         <Heading
-                            as="h2"
-                            fontSize={["3xl", "4xl", "5xl"]}
-                            color={THEME.colors.accent}
+                            as="h1"
+                            fontSize={["3xl", "4xl", "6xl"]}
+                            color="white"
                             fontFamily={THEME.fonts.heading}
-                            fontWeight="700"
+                            fontWeight="800"
+                            textAlign="center"
+                            textTransform="uppercase"
+                            letterSpacing="wide"
                         >
-                            Professional Baseball Analytics
+                            <Text as="span" color={THEME.colors.accent}>MLB</Text> First 5 Innings
+                            <Text fontSize={["xl", "2xl", "3xl"]} color="gray.400" mt={2}>
+                                Advanced Betting Analytics
+                            </Text>
                         </Heading>
 
                         <Text
-                            color="whiteAlpha.900"
+                            color="gray.300"
                             fontSize={["md", "lg"]}
                             fontFamily={THEME.fonts.body}
                             maxW="800px"
                             textAlign="center"
+                            lineHeight="tall"
                         >
-                            Access comprehensive First 5 Innings statistics and data-driven insights
-                            to enhance your baseball betting analysis.
+                            Make data-driven betting decisions with our comprehensive First 5 Innings statistics, 
+                            NRFI predictions, and advanced MLB analytics.
                         </Text>
 
-                        <VStack spacing={4} align="center">
-                            <Link to={ROUTES.STATISTICS}>
-                                <Button
-                                    bg={THEME.colors.primary}
-                                    _hover={{
-                                        bg: THEME.colors.primaryHover,
-                                        transform: 'translateY(-2px)',
-                                        transition: 'all 0.2s',
-                                    }}
-                                    size="lg"
-                                    px="2rem"
-                                    color="white"
-                                    fontFamily={THEME.fonts.heading}
-                                    fontWeight="600"
-                                    borderRadius="full"
-                                >
-                                    View Statistics
-                                </Button>
-                            </Link>
-                        </VStack>
+                        <Link to={ROUTES.STATISTICS}>
+                            <Button
+                                bg={THEME.colors.accent}
+                                _hover={{
+                                    bg: '#c41230',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: "lg"
+                                }}
+                                size="lg"
+                                px="2rem"
+                                py="1.8rem"
+                                color="white"
+                                fontFamily={THEME.fonts.heading}
+                                fontWeight="600"
+                                borderRadius="full"
+                                leftIcon={<Icon as={FaChartLine} />}
+                            >
+                                Analyze Team Stats
+                            </Button>
+                        </Link>
                     </VStack>
                 </GridItem>
             </Grid>
-            <Grid>
+            <Grid mb={"2rem"}>
 
                 <GridItem colSpan={12}>
                     <Box
