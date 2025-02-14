@@ -23,11 +23,9 @@ export const StatsPage: React.FC = () => {
     }
 
     return (
-        <Flex direction="column" minHeight="100vh" bg={THEME.colors.background}>
+        <Flex direction="column" minHeight="100vh"  bg={THEME.colors.background}>
             <NavBar />
-
-
-            <Flex direction="column" align="center" mt="6rem" px={4}>
+            <Flex direction="column" align="center" mt="6rem" px={4} mb="2rem">
                 <VStack
                     spacing={6}
                     align="center"
@@ -46,6 +44,7 @@ export const StatsPage: React.FC = () => {
                     <Button isLoading={isLoading}
                         loadingText="Analyzing"
                         bg={THEME.colors.primary}
+                        color="white"
                         _hover={{ bg: THEME.colors.primaryHover }}
                         onClick={handleCalculate}
                         isDisabled={!selectedTeam}

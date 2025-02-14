@@ -99,7 +99,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                                                 color={displayedTeamId === game.away_team.id ? "#ffa000" : "white"}
                                             >
                                                 {game.away_team.name}
-                                                <Text as="span" fontSize="sm" color="gray.400">
+                                                <Text as="span" fontSize="sm" ml={1} color="gray.400">
                                                     ({game.away_team.probable_pitcher.name})
                                                 </Text>
                                             </Td>
@@ -124,7 +124,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                                                 color={displayedTeamId === game.home_team.id ? "#ffa000" : "white"}
                                             >
                                                 {game.home_team.name}
-                                                <Text as="span" fontSize="sm" color="gray.400">
+                                                <Text as="span" fontSize="sm" ml={1} color="gray.400">
                                                     ({game.home_team.probable_pitcher.name})
                                                 </Text>
                                             </Td>
