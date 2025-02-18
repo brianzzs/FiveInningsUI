@@ -1,9 +1,10 @@
 export const ROUTES = {
     HOME: '/',
     STATISTICS: '/stats',
-  } as const;
+    PLAYERS: '/players'
+} as const;
   
-  export const THEME = {
+export const THEME = {
     colors: {
       primary: '#1a365d',
       primaryHover: '#2a4365',
@@ -28,4 +29,4 @@ export const ROUTES = {
       card: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
       hover: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
     }
-  } as const;
+} as const;
