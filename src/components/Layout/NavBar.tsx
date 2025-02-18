@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Heading, Link as ChakraLink } from '@chakra-ui/react';
+import { Flex, Heading, Link as ChakraLink, HStack } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { ROUTES, THEME } from '../../constants';
 import { Icon } from '@chakra-ui/react';
@@ -42,20 +42,37 @@ export const NavBar: React.FC = () => (
                 Five Innings
             </ChakraLink>
         </Heading>
-        <ChakraLink
-            as={Link}
-            to={ROUTES.STATISTICS}
-            color="white"
-            fontSize="lg"
-            fontFamily={THEME.fonts.body}
-            fontWeight="500"
-            _hover={{ 
-                textDecoration: 'none', 
-                color: THEME.colors.accent
-            }}
-            transition="all 0.2s"
-        >
-            Statistics
-        </ChakraLink>
+        <HStack spacing={6}>
+            <ChakraLink
+                as={Link}
+                to={ROUTES.STATISTICS}
+                color="white"
+                fontSize="lg"
+                fontFamily={THEME.fonts.body}
+                fontWeight="500"
+                _hover={{ 
+                    textDecoration: 'none', 
+                    color: THEME.colors.accent
+                }}
+                transition="all 0.2s"
+            >
+                Statistics
+            </ChakraLink>
+            <ChakraLink
+                as={Link}
+                to={ROUTES.PLAYERS}
+                color="white"
+                fontSize="lg"
+                fontFamily={THEME.fonts.body}
+                fontWeight="500"
+                _hover={{ 
+                    textDecoration: 'none', 
+                    color: THEME.colors.accent
+                }}
+                transition="all 0.2s"
+            >
+                Players
+            </ChakraLink>
+        </HStack>
     </Flex>
 );

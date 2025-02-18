@@ -54,7 +54,7 @@ export const StartPage: React.FC = () => {
                             lineHeight="tall"
                         >
                             Make data-driven betting decisions with our comprehensive First 5 Innings statistics, 
-                            NRFI predictions, and advanced MLB analytics.
+                            NRFI predictions, and advanced MLB analytics including PLAYER STATS.
                         </Text>
 
                         <Link to={ROUTES.STATISTICS}>
