@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Grid,
@@ -17,14 +17,49 @@ import {
     TabPanels,
     Tab,
     TabPanel,
+    Select,
+    Flex,
+    Spinner,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type { PlayerStats } from './interface';
+import { THEME } from '../../constants';
 
 interface PlayerStatsProps {
     playerId: number;
     season: string;
+}
+
+interface RecentHittingGame {
+    at_bats: number;
+    avg: number;
+    game_date: string;
+    hits: number;
+    home_runs: number;
+    opponent_pitcher: string;
+    opponent_team: string;
+    rbis: number;
+    runs: number;
+    strikeouts: number;
+    walks: number;
+}
+
+interface RecentPitchingGame {
+    game_date: string;
+    hits_allowed: number;
+    home_runs_allowed: number;
+    innings_pitched: string;
+    opponent_team: string;
+    strikeouts: number;
+    walks_allowed: number;
+}
+
+interface RecentStats {
+    games_found: number;
+    player_id: number;
+    player_name: string;
+    recent_stats: RecentHittingGame[] | RecentPitchingGame[];
 }
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
@@ -111,6 +146,9 @@ const PitchingStats: React.FC<{
 };
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
+    const [gamesCount, setGamesCount] = useState<number>(2);
+    // const currentYear = new Date().getFullYear().toString();
+
     const { data: stats, isLoading } = useQuery({
         queryKey: ['playerStats', playerId, season],
         queryFn: async () => {
@@ -119,9 +157,16 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
         },
     });
 
-    if (isLoading || !stats) {
-        return null;
-    }
+    const { data: recentStats, isLoading: isLoadingRecent } = useQuery({
+        queryKey: ['recentStats', playerId, gamesCount],
+        queryFn: async () => {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/recent-stats/${playerId}/${gamesCount}`);
+            return response.data as RecentStats;
+        },
+        enabled: season === "2024",
+    });
+
+    if (isLoading || !stats) return <Spinner />;
 
     const isPitcher = stats.player_info.position === 'P';
     const isTwoWayPlayer = stats.player_info.position === 'TWP';
@@ -216,6 +261,67 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         </VStack>
                     </Box>
                 </Grid>
+
+                {season === "2024" && (
+                    <Box>
+                        <Flex justify="space-between" align="center" mb={4}>
+                            <Heading size="md">Last Games Stats</Heading>
+                            <Select
+                                value={gamesCount}
+                                onChange={(e) => setGamesCount(Number(e.target.value))}
+                                bg="gray.700"
+                                color="red.500"
+                                maxW="200px"
+                                alignSelf="center"
+                                fontFamily={THEME.fonts.body}
+                            >
+                                {[2, 5, 10, 15, 20].map(num => (
+                                    <option key={num} value={num}>Last {num} Games</option>
+                                ))}
+                            </Select>
+                        </Flex>
+                        
+                        {recentStats && (
+                            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                                {recentStats.recent_stats.map((game, index) => (
+                                    <Box 
+                                        key={index} 
+                                        p={4} 
+                                        bg="gray.700" 
+                                        borderRadius="md"
+                                        _hover={{ transform: 'scale(1.02)' }}
+                                        transition="all 0.2s"
+                                    >
+                                        <Text fontWeight="bold" mb={2}>
+                                            vs {game.opponent_team}
+                                        </Text>
+                                        <Text fontSize="sm" color="gray.400" mb={3}>
+                                            {new Date(game.game_date).toLocaleDateString()}
+                                        </Text>
+                                        {'at_bats' in game ? (
+                                            <SimpleGrid columns={2} spacing={2}>
+                                                <Text>H/AB: {game.hits}/{game.at_bats}</Text>
+                                                <Text>HR: {game.home_runs}</Text>
+                                                <Text>RBI: {game.rbis}</Text>
+                                                <Text>R: {game.runs}</Text>
+                                                <Text>K: {game.strikeouts}</Text>
+                                                <Text>BB: {game.walks}</Text>
+                                            </SimpleGrid>
+                                        ) : (
+                                            <SimpleGrid columns={2} spacing={2}>
+                                                <Text>IP: {game.innings_pitched}</Text>
+                                                <Text>H: {game.hits_allowed}</Text>
+                                                <Text>K: {game.strikeouts}</Text>
+                                                <Text>BB: {game.walks_allowed}</Text>
+                                                <Text>HR: {game.home_runs_allowed}</Text>
+                                            </SimpleGrid>
+                                        )}
+                                    </Box>
+                                ))}
+                            </SimpleGrid>
+                        )}
+                    </Box>
+                )}
 
                 <Divider />
 
