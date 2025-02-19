@@ -16,6 +16,7 @@ import {
     CardHeader,
 } from "@chakra-ui/react";
 import { getTeamAbbreviation } from '../../constants/teams';
+import TeamLogo from "../TeamLogo/TeamLogo";
 
 interface ResultsTableProps {
     data: Game[];
@@ -96,7 +97,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                                             <Td
                                                 fontWeight="bold"
                                                 color={displayedTeamId === game.away_team.id ? "#ffa000" : "white"}
-                                            >
+                                            > 
                                                 {getTeamAbbreviation(game.away_team.name)}
                                                 <Text as="span" fontSize="sm" ml={1} color="gray.400">
                                                     ({game.away_team.probable_pitcher.name})

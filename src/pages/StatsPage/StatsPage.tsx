@@ -35,7 +35,7 @@ export const StatsPage: React.FC = () => {
                     shadow="xl"
                     width={["95%", "80%", "60%"]}
                 >
-                    {selectedTeam && <TeamLogo teamId={selectedTeam} />}
+                    {selectedTeam && <TeamLogo teamId={selectedTeam} size="80px" />}
 
                     <HStack spacing={4} width="100%">
                         <TeamDropdown selectedTeam={selectedTeam} onTeamChange={setSelectedTeam} />

@@ -31,9 +31,12 @@ import bluejaysLogo from "../../img/bluejays.png";
 import whitesoxLogo from "../../img/whitesox.png";
 import natsLogo from "../../img/nats.png";
 
-type TeamLogoProps = {
+interface TeamLogoProps {
     teamId: number;
-};
+    size?: string;
+    marginTop?: string;
+    floatLeft?: boolean
+}
 
 const TEAM_LOGOS: Record<number, string> = {
     109: dbacksLogo,
@@ -68,14 +71,15 @@ const TEAM_LOGOS: Record<number, string> = {
     120: natsLogo,
 };
 
-const TeamLogo: React.FC<TeamLogoProps> = ({ teamId }) => {
+const TeamLogo: React.FC<TeamLogoProps> = ({ teamId, size, marginTop, floatLeft }) => {
     return (
-        <Box display="flex" justifyContent="center" alignItems="center" mt="4">
+        <Box display="flex" justifyContent="center" alignItems="center" mt={marginTop} float={floatLeft ? "left" : "none"}>
             <Image
                 src={TEAM_LOGOS[teamId]}
                 alt="Team Logo"
-                boxSize="80px"
+                boxSize={size}
                 objectFit="contain"
+                backgroundColor="white" borderRadius="lg"
             />
         </Box>
     );

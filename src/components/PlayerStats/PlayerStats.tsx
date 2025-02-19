@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Grid,
@@ -17,14 +17,53 @@ import {
     TabPanels,
     Tab,
     TabPanel,
+    Select,
+    Flex,
+    Spinner,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type { PlayerStats } from './interface';
+import { THEME } from '../../constants';
+import { MdSportsBaseball, MdPerson } from 'react-icons/md';
+import { FaBaseballBatBall, FaPersonRunning } from 'react-icons/fa6';
+import TeamLogo from '../TeamLogo/TeamLogo';
+import { getTeamAbbreviation, getTeamIdFromName } from '../../constants/teams';
 
 interface PlayerStatsProps {
     playerId: number;
     season: string;
+}
+
+interface RecentHittingGame {
+    at_bats: number;
+    avg: number;
+    game_date: string;
+    hits: number;
+    home_runs: number;
+    opponent_pitcher: string;
+    opponent_team: string;
+    rbis: number;
+    runs: number;
+    strikeouts: number;
+    walks: number;
+}
+
+interface RecentPitchingGame {
+    game_date: string;
+    hits_allowed: number;
+    home_runs_allowed: number;
+    innings_pitched: string;
+    opponent_team: string;
+    strikeouts: number;
+    walks_allowed: number;
+}
+
+interface RecentStats {
+    games_found: number;
+    player_id: number;
+    player_name: string;
+    recent_stats: RecentHittingGame[] | RecentPitchingGame[];
 }
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
@@ -68,9 +107,9 @@ const HittingStats: React.FC<{ stats: NonNullable<PlayerStats['hitting_stats']>,
     </>
 );
 
-const PitchingStats: React.FC<{ 
+const PitchingStats: React.FC<{
     stats: PlayerStats,
-    seasonYear: string 
+    seasonYear: string
 }> = ({ stats, seasonYear }) => {
     const career = stats.pitching_stats?.career || stats.career_stats;
     const season = stats.pitching_stats?.season || stats.season_stats;
@@ -111,6 +150,9 @@ const PitchingStats: React.FC<{
 };
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
+    const [gamesCount, setGamesCount] = useState<number>(2);
+    // const currentYear = new Date().getFullYear().toString();
+
     const { data: stats, isLoading } = useQuery({
         queryKey: ['playerStats', playerId, season],
         queryFn: async () => {
@@ -119,13 +161,20 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
         },
     });
 
-    if (isLoading || !stats) {
-        return null;
-    }
+    const { data: recentStats, isLoading: isLoadingRecent } = useQuery({
+        queryKey: ['recentStats', playerId, gamesCount],
+        queryFn: async () => {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/recent-stats/${playerId}/${gamesCount}`);
+            return response.data as RecentStats;
+        },
+        enabled: season === "2024",
+    });
+
+    if (isLoading || !stats) return <Spinner />;
 
     const isPitcher = stats.player_info.position === 'P';
     const isTwoWayPlayer = stats.player_info.position === 'TWP';
-    
+
     const hasHittingStats = (stats: PlayerStats) => {
         return stats.career_stats?.avg !== undefined || stats.hitting_stats !== undefined;
     };
@@ -136,7 +185,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
 
     const createHittingStatsObject = (stats: PlayerStats) => {
         if (stats.hitting_stats) return stats.hitting_stats;
-        
+
         return {
             career: {
                 games: stats.career_stats!.games,
@@ -173,26 +222,151 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
     return (
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
             <VStack spacing={6} align="stretch">
-                <Grid templateColumns={{ base: "1fr", md: "auto 1fr" }} gap={6}>
-                    <Image
-                        src={stats.player_info.images.headshot}
-                        alt={stats.player_info.full_name}
-                        borderRadius="md"
-                        maxW="200px"
-                    />
-                    <VStack align="start" spacing={4}>
-                        <Heading size="lg">{stats.player_info.full_name}</Heading>
-                        <HStack spacing={4} flexWrap="wrap">
-                            <Text>Position: {stats.player_info.position}</Text>
-                            <Text>Age: {stats.player_info.age}</Text>
-                            <Text>Bats: {stats.player_info.bat_side}</Text>
-                            <Text>Throws: {stats.player_info.throw_hand}</Text>
-                            <Text>Team: {stats.player_info.current_team}</Text>
-                        </HStack> 
-                    </VStack>
+
+                <Grid
+                    templateColumns={{ base: "1fr", md: "auto 1fr" }}
+                    gap={6}
+                    bgImage={stats.player_info.images.action || 'none'}
+                    bgSize="cover"
+                    bgPosition="center 10%"
+                    bgRepeat="no-repeat"
+                    position="relative"
+                    _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        zIndex: 1,
+                    }}
+                >
+                    <Box position="relative" zIndex={2} pl={1}>
+                        <Image
+                            src={stats.player_info.images.headshot}
+                            alt={stats.player_info.full_name}
+                            borderRadius="md"
+                            maxW="200px"
+                        />
+                        <VStack align="start" spacing={4}>
+                            <Heading size="lg" fontWeight="bold" lineHeight="1.2">
+                                {stats.player_info.full_name}
+                            </Heading>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.300">
+                                Position: {stats.player_info.position}
+                            </Text>
+                            <HStack spacing={4} flexWrap="wrap">
+                                <Text fontWeight="bold">Age: {stats.player_info.age}</Text>
+                                <Text fontWeight="bold">Bats: {stats.player_info.bat_side}</Text>
+                                <Text fontWeight="bold">Throws: {stats.player_info.throw_hand}</Text>
+                                <Text fontWeight="bold" > Team: {stats.player_info.current_team}</Text>
+                                <TeamLogo teamId={getTeamIdFromName(stats.player_info.current_team)} size="35px" marginTop="auto" floatLeft={true} /> 
+                            </HStack>
+                        </VStack>
+                    </Box>
                 </Grid>
 
-                <Divider  />
+                {season === "2024" && (
+                    <Box>
+                        <Flex justify="space-between" align="center" mb={4}>
+                            <Heading size="md">Last Games Stats</Heading>
+                            <Select
+                                value={gamesCount}
+                                onChange={(e) => setGamesCount(Number(e.target.value))}
+                                bg="gray.700"
+                                color="red.500"
+                                maxW="200px"
+                                alignSelf="center"
+                                fontFamily={THEME.fonts.body}
+                            >
+                                {[2, 5, 10, 15, 20].map(num => (
+                                    <option key={num} value={num}>Last {num} Games</option>
+                                ))}
+                            </Select>
+                        </Flex>
+
+                        {recentStats && (
+                            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                                {recentStats.recent_stats.map((game, index) => (
+                                    <Box
+                                        key={index}
+                                        p={4}
+                                        bg="gray.700"
+                                        borderRadius="md"
+                                        _hover={{ transform: 'scale(1.02)' }}
+                                        transition="all 0.2s"
+                                    >
+                                        <Flex align="center" justify="space-between" mb={2}>
+                                            <Flex align="center" gap={2}>
+                                                <Text fontWeight="bold">
+                                                    vs {getTeamAbbreviation(game.opponent_team)}
+                                                </Text>
+                                                <TeamLogo teamId={getTeamIdFromName(game.opponent_team)} size="35px" marginTop="auto" />
+
+                                            </Flex>
+                                            <Text fontSize="sm" color="gray.400">
+                                                {new Date(game.game_date).toLocaleDateString()}
+                                            </Text>
+                                        </Flex>
+                                        {'at_bats' in game ? (
+                                            <SimpleGrid columns={2} spacing={2}>
+                                                <Flex align="center" gap={2}>
+                                                    <FaBaseballBatBall />
+                                                    <Text fontWeight="bold">H/AB: {game.hits}/{game.at_bats}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">HR: {game.home_runs}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaPersonRunning />
+                                                    <Text fontWeight="bold">RBI: {game.rbis}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaPersonRunning />
+                                                    <Text fontWeight="bold">R: {game.runs}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdPerson />
+                                                    <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">BB: {game.walks}</Text>
+                                                </Flex>
+                                            </SimpleGrid>
+                                        ) : (
+                                            <SimpleGrid columns={2} spacing={2}>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaBaseballBatBall />
+                                                    <Text fontWeight="bold">H: {game.hits_allowed}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdPerson />
+                                                    <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <Text fontWeight="bold">BB: {game.walks_allowed}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">HR: {game.home_runs_allowed}</Text>
+                                                </Flex>
+                                            </SimpleGrid>
+                                        )}
+                                    </Box>
+                                ))}
+                            </SimpleGrid>
+                        )}
+                    </Box>
+                )}
+
+                <Divider />
 
                 {isTwoWayPlayer ? (
                     <Tabs variant="enclosed" >
@@ -202,13 +376,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         </TabList>
                         <TabPanels >
                             <TabPanel  >
-                                <HittingStats 
-                                    stats={createHittingStatsObject(stats)} 
-                                    season={season} 
+                                <HittingStats
+                                    stats={createHittingStatsObject(stats)}
+                                    season={season}
                                 />
                             </TabPanel>
                             <TabPanel >
-                                <PitchingStats 
+                                <PitchingStats
                                     stats={stats}
                                     seasonYear={season}
                                 />
@@ -216,13 +390,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         </TabPanels>
                     </Tabs>
                 ) : isPitcher && showPitchingStats ? (
-                    <PitchingStats 
+                    <PitchingStats
                         stats={stats}
                         seasonYear={season}
                     />
                 ) : showHittingStats ? (
-                    <HittingStats 
-                        stats={createHittingStatsObject(stats)} 
+                    <HittingStats
+                        stats={createHittingStatsObject(stats)}
                         season={season}
                     />
                 ) : (
@@ -231,7 +405,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                     </Text>
                 )}
             </VStack>
-        </Box>
+        </Box >
     );
 };
 

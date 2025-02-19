@@ -33,4 +33,41 @@ export const TEAM_ABBREVIATIONS: Record<string, string> = {
 
 export const getTeamAbbreviation = (fullName: string): string => {
     return TEAM_ABBREVIATIONS[fullName] || fullName;
+};
+
+export const TEAM_IDS_FROM_ABBREV: Record<string, number> = {
+    "ARI D-backs": 109,
+    "ATL Braves": 144,
+    "BAL Orioles": 110,
+    "BOS Red Sox": 111,
+    "CHC Cubs": 112,
+    "CIN Reds": 113,
+    "CLE Guardians": 114,
+    "COL Rockies": 115,
+    "DET Tigers": 116,
+    "HOU Astros": 117,
+    "KC Royals": 118,
+    "LAA Angels": 108,
+    "LAD Dodgers": 119,
+    "MIA Marlins": 146,
+    "MIL Brewers": 158,
+    "MIN Twins": 142,
+    "NYM Mets": 121,
+    "NYY Yankees": 147,
+    "OAK Athletics": 133,
+    "PHI Phillies": 143,
+    "PIT Pirates": 134,
+    "SD Padres": 135,
+    "SEA Mariners": 136,
+    "SF Giants": 137,
+    "STL Cardinals": 138,
+    "TB Rays": 139,
+    "TEX Rangers": 140,
+    "TOR Blue Jays": 141,
+    "CWS White Sox": 145,
+    "WSH Nationals": 120,
+};
+
+export const getTeamIdFromName = (teamName: string): number => {
+    return TEAM_IDS_FROM_ABBREV[teamName] || 0;
 }; 
