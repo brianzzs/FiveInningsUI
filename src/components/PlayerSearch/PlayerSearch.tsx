@@ -10,20 +10,14 @@ import {
     InputGroup,
     InputLeftElement,
     Spinner,
+    Avatar,
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { debounce } from 'lodash';
+import { Player } from './interface';
 
-interface Player {
-    id: number;
-    full_name: string;
-    first_name: string;
-    last_name: string;
-    position: string;
-    current_team: string;
-}
 
 interface PlayerSearchProps {
     onPlayerSelect: (playerId: number) => void;
@@ -43,7 +37,9 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerSelect }) => {
     const searchPlayers = async (query: string): Promise<Player[]> => {
         if (!query || query.length < 3) return [];
         const response = await axios.get(`${apiUrl}/player/search/${query}`);
-        return response.data;
+        const players = response.data;
+        players.sort((a: Player, b: Player) => a.full_name.localeCompare(b.full_name));
+        return players;
     };
 
     const debouncedSearchTerm = debounce((term: string) => {
@@ -71,12 +67,12 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerSelect }) => {
 
     return (
         <Box position="relative" width="100%" maxW="600px" ref={ref}>
-            <InputGroup>
+            <InputGroup display="flex" justifyContent="center" alignItems="center">
                 <InputLeftElement pointerEvents="none">
                     {isLoading ? <Spinner size="sm" /> : <SearchIcon color="gray.300" />}
                 </InputLeftElement>
                 <Input
-                    placeholder="Search for a player..."
+                    placeholder="Search for a player... (Aaron Judge, Shohei Ohtani, Bryce Harper, etc.)"
                     onChange={handleInputChange}
                     bg="gray.700"
                     color="white"
@@ -114,11 +110,15 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerSelect }) => {
                             borderColor="gray.600"
                         >
                             <Flex align="center" mb={2}>
+                                <Avatar src={player.image_url} size="md" mr={2} />
                                 <Text color="white" fontWeight="bold">
                                     {player.full_name}
                                 </Text>
                                 <Text color="gray.400" ml={2} fontSize="sm">
                                     {player.position}
+                                </Text>
+                                <Text color="gray.400" ml={2} fontSize="sm">
+                                    {player.current_team}
                                 </Text>
                             </Flex>
                         </ListItem>
