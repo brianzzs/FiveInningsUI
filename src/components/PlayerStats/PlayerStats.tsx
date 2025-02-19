@@ -20,121 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-
-interface PlayerStats {
-    hitting_stats?: {
-        career: {
-            games: string;
-            at_bats: string;
-            hits: string;
-            avg: string;
-            home_runs: string;
-            rbi: string;
-            runs: string;
-            stolen_bases: string;
-            obp: string;
-            slg: string;
-            ops: string;
-        };
-        season: {
-            games: string;
-            at_bats: string;
-            hits: string;
-            avg: string;
-            home_runs: string;
-            rbi: string;
-            runs: string;
-            stolen_bases: string;
-            obp: string;
-            slg: string;
-            ops: string;
-        };
-    };
-    pitching_stats?: {
-        career: {
-            era: string;
-            games: string;
-            games_started: string;
-            innings_pitched: string;
-            losses: string;
-            saves: string;
-            strikeouts: string;
-            walks: string;
-            whip: string;
-            wins: string;
-        };
-        season: {
-            era: string;
-            games: string;
-            games_started: string;
-            innings_pitched: string;
-            losses: string;
-            saves: string;
-            strikeouts: string;
-            walks: string;
-            whip: string;
-            wins: string;
-        };
-    };
-    career_stats?: {
-        era?: string;
-        games: string;
-        games_started?: string;
-        innings_pitched?: string;
-        at_bats?: string;
-        avg?: string;
-        hits?: string;
-        home_runs?: string;
-        obp?: string;
-        ops?: string;
-        rbi?: string;
-        runs?: string;
-        slg?: string;
-        losses?: string;
-        saves?: string;
-        strikeouts?: string;
-        walks?: string;
-        whip?: string;
-        wins?: string;
-        stolen_bases?: string;
-    };
-    season_stats?: {
-        era?: string;
-        games: string;
-        games_started?: string;
-        innings_pitched?: string;
-        at_bats?: string;
-        avg?: string;
-        hits?: string;
-        home_runs?: string;
-        obp?: string;
-        ops?: string;
-        rbi?: string;
-        runs?: string;
-        slg?: string;
-        losses?: string;
-        saves?: string;
-        strikeouts?: string;
-        walks?: string;
-        whip?: string;
-        wins?: string;
-        stolen_bases?: string;
-    };
-    player_info: {
-        full_name: string;
-        age: number;
-        position: string;
-        current_team: string;
-        bat_side: string;
-        throw_hand: string;
-        birth_date: string;
-        images: {
-            action: string;
-            headshot: string;
-        };
-    };
-    season: string;
-}
+import type { PlayerStats } from './interface';
 
 interface PlayerStatsProps {
     playerId: number;
@@ -200,8 +86,8 @@ const PitchingStats: React.FC<{
                     <StatBox label="WHIP" value={season?.whip ?? '-'} />
                     <StatBox label="K" value={season?.strikeouts ?? '-'} />
                     <StatBox label="BB" value={season?.walks ?? '-'} />
-                    <StatBox label="G" value={season?.games ?? '-'} />
-                    <StatBox label="GS" value={season?.games_started ?? '-'} />
+                    <StatBox label="Games" value={season?.games ?? '-'} />
+                    <StatBox label="Games Started" value={season?.games_started ?? '-'} />
                 </SimpleGrid>
             </Box>
 
@@ -302,26 +188,26 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                             <Text>Bats: {stats.player_info.bat_side}</Text>
                             <Text>Throws: {stats.player_info.throw_hand}</Text>
                             <Text>Team: {stats.player_info.current_team}</Text>
-                        </HStack>
+                        </HStack> 
                     </VStack>
                 </Grid>
 
-                <Divider />
+                <Divider  />
 
                 {isTwoWayPlayer ? (
                     <Tabs variant="enclosed" >
-                        <TabList mb={10}>
+                        <TabList pb={4}>
                             <Tab>Hitting</Tab>
                             <Tab>Pitching</Tab>
                         </TabList>
                         <TabPanels >
-                            <TabPanel >
+                            <TabPanel  >
                                 <HittingStats 
                                     stats={createHittingStatsObject(stats)} 
                                     season={season} 
                                 />
                             </TabPanel>
-                            <TabPanel>
+                            <TabPanel >
                                 <PitchingStats 
                                     stats={stats}
                                     seasonYear={season}
