@@ -25,6 +25,10 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type { PlayerStats } from './interface';
 import { THEME } from '../../constants';
+import { MdSportsBaseball, MdPerson } from 'react-icons/md';
+import { FaBaseballBatBall, FaPersonRunning } from 'react-icons/fa6';
+import TeamLogo from '../TeamLogo/TeamLogo';
+import { getTeamAbbreviation, getTeamIdFromName } from '../../constants/teams';
 
 interface PlayerStatsProps {
     playerId: number;
@@ -219,12 +223,12 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
             <VStack spacing={6} align="stretch">
 
-                <Grid 
-                    templateColumns={{ base: "1fr", md: "auto 1fr" }} 
-                    gap={6} 
-                    bgImage={stats.player_info.images.action || 'none'} 
-                    bgSize="cover" 
-                    bgPosition="center 10%" 
+                <Grid
+                    templateColumns={{ base: "1fr", md: "auto 1fr" }}
+                    gap={6}
+                    bgImage={stats.player_info.images.action || 'none'}
+                    bgSize="cover"
+                    bgPosition="center 10%"
                     bgRepeat="no-repeat"
                     position="relative"
                     _before={{
@@ -234,7 +238,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         right: 0,
                         bottom: 0,
                         left: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)', 
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
                         zIndex: 1,
                     }}
                 >
@@ -253,10 +257,11 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                                 Position: {stats.player_info.position}
                             </Text>
                             <HStack spacing={4} flexWrap="wrap">
-                                <Text>Age: {stats.player_info.age}</Text>
-                                <Text>Bats: {stats.player_info.bat_side}</Text>
-                                <Text>Throws: {stats.player_info.throw_hand}</Text>
-                                <Text>Team: {stats.player_info.current_team}</Text>
+                                <Text fontWeight="bold">Age: {stats.player_info.age}</Text>
+                                <Text fontWeight="bold">Bats: {stats.player_info.bat_side}</Text>
+                                <Text fontWeight="bold">Throws: {stats.player_info.throw_hand}</Text>
+                                <Text fontWeight="bold" > Team: {stats.player_info.current_team}</Text>
+                                <TeamLogo teamId={getTeamIdFromName(stats.player_info.current_team)} size="35px" marginTop="auto" floatLeft={true} /> 
                             </HStack>
                         </VStack>
                     </Box>
@@ -280,40 +285,78 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                                 ))}
                             </Select>
                         </Flex>
-                        
+
                         {recentStats && (
                             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
                                 {recentStats.recent_stats.map((game, index) => (
-                                    <Box 
-                                        key={index} 
-                                        p={4} 
-                                        bg="gray.700" 
+                                    <Box
+                                        key={index}
+                                        p={4}
+                                        bg="gray.700"
                                         borderRadius="md"
                                         _hover={{ transform: 'scale(1.02)' }}
                                         transition="all 0.2s"
                                     >
-                                        <Text fontWeight="bold" mb={2}>
-                                            vs {game.opponent_team}
-                                        </Text>
-                                        <Text fontSize="sm" color="gray.400" mb={3}>
-                                            {new Date(game.game_date).toLocaleDateString()}
-                                        </Text>
+                                        <Flex align="center" justify="space-between" mb={2}>
+                                            <Flex align="center" gap={2}>
+                                                <Text fontWeight="bold">
+                                                    vs {getTeamAbbreviation(game.opponent_team)}
+                                                </Text>
+                                                <TeamLogo teamId={getTeamIdFromName(game.opponent_team)} size="35px" marginTop="auto" />
+
+                                            </Flex>
+                                            <Text fontSize="sm" color="gray.400">
+                                                {new Date(game.game_date).toLocaleDateString()}
+                                            </Text>
+                                        </Flex>
                                         {'at_bats' in game ? (
                                             <SimpleGrid columns={2} spacing={2}>
-                                                <Text>H/AB: {game.hits}/{game.at_bats}</Text>
-                                                <Text>HR: {game.home_runs}</Text>
-                                                <Text>RBI: {game.rbis}</Text>
-                                                <Text>R: {game.runs}</Text>
-                                                <Text>K: {game.strikeouts}</Text>
-                                                <Text>BB: {game.walks}</Text>
+                                                <Flex align="center" gap={2}>
+                                                    <FaBaseballBatBall />
+                                                    <Text fontWeight="bold">H/AB: {game.hits}/{game.at_bats}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">HR: {game.home_runs}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaPersonRunning />
+                                                    <Text fontWeight="bold">RBI: {game.rbis}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaPersonRunning />
+                                                    <Text fontWeight="bold">R: {game.runs}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdPerson />
+                                                    <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">BB: {game.walks}</Text>
+                                                </Flex>
                                             </SimpleGrid>
                                         ) : (
                                             <SimpleGrid columns={2} spacing={2}>
-                                                <Text>IP: {game.innings_pitched}</Text>
-                                                <Text>H: {game.hits_allowed}</Text>
-                                                <Text>K: {game.strikeouts}</Text>
-                                                <Text>BB: {game.walks_allowed}</Text>
-                                                <Text>HR: {game.home_runs_allowed}</Text>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <FaBaseballBatBall />
+                                                    <Text fontWeight="bold">H: {game.hits_allowed}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdPerson />
+                                                    <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <Text fontWeight="bold">BB: {game.walks_allowed}</Text>
+                                                </Flex>
+                                                <Flex align="center" gap={2}>
+                                                    <MdSportsBaseball />
+                                                    <Text fontWeight="bold">HR: {game.home_runs_allowed}</Text>
+                                                </Flex>
                                             </SimpleGrid>
                                         )}
                                     </Box>
