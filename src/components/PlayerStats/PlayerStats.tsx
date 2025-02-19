@@ -68,9 +68,9 @@ const HittingStats: React.FC<{ stats: NonNullable<PlayerStats['hitting_stats']>,
     </>
 );
 
-const PitchingStats: React.FC<{ 
+const PitchingStats: React.FC<{
     stats: PlayerStats,
-    seasonYear: string 
+    seasonYear: string
 }> = ({ stats, seasonYear }) => {
     const career = stats.pitching_stats?.career || stats.career_stats;
     const season = stats.pitching_stats?.season || stats.season_stats;
@@ -125,7 +125,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
 
     const isPitcher = stats.player_info.position === 'P';
     const isTwoWayPlayer = stats.player_info.position === 'TWP';
-    
+
     const hasHittingStats = (stats: PlayerStats) => {
         return stats.career_stats?.avg !== undefined || stats.hitting_stats !== undefined;
     };
@@ -136,7 +136,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
 
     const createHittingStatsObject = (stats: PlayerStats) => {
         if (stats.hitting_stats) return stats.hitting_stats;
-        
+
         return {
             career: {
                 games: stats.career_stats!.games,
@@ -173,26 +173,51 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
     return (
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
             <VStack spacing={6} align="stretch">
-                <Grid templateColumns={{ base: "1fr", md: "auto 1fr" }} gap={6}>
-                    <Image
-                        src={stats.player_info.images.headshot}
-                        alt={stats.player_info.full_name}
-                        borderRadius="md"
-                        maxW="200px"
-                    />
-                    <VStack align="start" spacing={4}>
-                        <Heading size="lg">{stats.player_info.full_name}</Heading>
-                        <HStack spacing={4} flexWrap="wrap">
-                            <Text>Position: {stats.player_info.position}</Text>
-                            <Text>Age: {stats.player_info.age}</Text>
-                            <Text>Bats: {stats.player_info.bat_side}</Text>
-                            <Text>Throws: {stats.player_info.throw_hand}</Text>
-                            <Text>Team: {stats.player_info.current_team}</Text>
-                        </HStack> 
-                    </VStack>
+
+                <Grid 
+                    templateColumns={{ base: "1fr", md: "auto 1fr" }} 
+                    gap={6} 
+                    bgImage={stats.player_info.images.action || 'none'} 
+                    bgSize="cover" 
+                    bgPosition="center 10%" 
+                    bgRepeat="no-repeat"
+                    position="relative"
+                    _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)', 
+                        zIndex: 1,
+                    }}
+                >
+                    <Box position="relative" zIndex={2} pl={1}>
+                        <Image
+                            src={stats.player_info.images.headshot}
+                            alt={stats.player_info.full_name}
+                            borderRadius="md"
+                            maxW="200px"
+                        />
+                        <VStack align="start" spacing={4}>
+                            <Heading size="lg" fontWeight="bold" lineHeight="1.2">
+                                {stats.player_info.full_name}
+                            </Heading>
+                            <Text fontSize="sm" fontWeight="medium" color="gray.300">
+                                Position: {stats.player_info.position}
+                            </Text>
+                            <HStack spacing={4} flexWrap="wrap">
+                                <Text>Age: {stats.player_info.age}</Text>
+                                <Text>Bats: {stats.player_info.bat_side}</Text>
+                                <Text>Throws: {stats.player_info.throw_hand}</Text>
+                                <Text>Team: {stats.player_info.current_team}</Text>
+                            </HStack>
+                        </VStack>
+                    </Box>
                 </Grid>
 
-                <Divider  />
+                <Divider />
 
                 {isTwoWayPlayer ? (
                     <Tabs variant="enclosed" >
@@ -202,13 +227,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         </TabList>
                         <TabPanels >
                             <TabPanel  >
-                                <HittingStats 
-                                    stats={createHittingStatsObject(stats)} 
-                                    season={season} 
+                                <HittingStats
+                                    stats={createHittingStatsObject(stats)}
+                                    season={season}
                                 />
                             </TabPanel>
                             <TabPanel >
-                                <PitchingStats 
+                                <PitchingStats
                                     stats={stats}
                                     seasonYear={season}
                                 />
@@ -216,13 +241,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                         </TabPanels>
                     </Tabs>
                 ) : isPitcher && showPitchingStats ? (
-                    <PitchingStats 
+                    <PitchingStats
                         stats={stats}
                         seasonYear={season}
                     />
                 ) : showHittingStats ? (
-                    <HittingStats 
-                        stats={createHittingStatsObject(stats)} 
+                    <HittingStats
+                        stats={createHittingStatsObject(stats)}
                         season={season}
                     />
                 ) : (
@@ -231,7 +256,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
                     </Text>
                 )}
             </VStack>
-        </Box>
+        </Box >
     );
 };
 
