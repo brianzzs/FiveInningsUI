@@ -5,7 +5,7 @@ import { NavBar } from '../../components/Layout/NavBar';
 import TodaySchedule from '../../components/TodaySchedule/TodaySchedule';
 import FooterComponent from '../../components/Layout/Footer/Footer';
 import { ROUTES, THEME } from '../../constants';
-import backgroundImage from '../../img/bg2.webp';
+import backgroundImage from '../../img/bg2.jpg';
 import { FaChartLine } from 'react-icons/fa';
 import { Icon } from '@chakra-ui/react';
 
@@ -22,9 +22,9 @@ export const StartPage: React.FC = () => {
                 pb="60px"
                 h="auto"
                 w="100%"
-                background={`linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url(${backgroundImage})`}
+                background={`linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url(${backgroundImage})`}
                 backgroundSize="cover"
-                backgroundPosition="left 20%"
+                backgroundPosition="left 30%"
                 backgroundRepeat="no-repeat"
             >
                 <GridItem colSpan={12} mt="4rem">
@@ -40,7 +40,7 @@ export const StartPage: React.FC = () => {
                             letterSpacing="wide"
                         >
                             <Text as="span" color={THEME.colors.accent}>MLB</Text> First 5 Innings
-                            <Text fontSize={["xl", "2xl", "3xl"]} color="gray.400" mt={2}>
+                            <Text fontSize={["xl", "2xl", "3xl"]} color=".800" mt={2}>
                                 Advanced Betting Analytics
                             </Text>
                         </Heading>
