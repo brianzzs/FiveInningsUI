@@ -89,7 +89,7 @@ export const StartPage: React.FC = () => {
                         p={6}
                         mx={[4, 8, 16]}
                     >
-                        <TodaySchedule isLoading={isLoading} setIsLoading={setIsLoading} />
+                        <TodaySchedule />
                     </Box>
                 </GridItem>
             </Grid>

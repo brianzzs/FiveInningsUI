@@ -1,19 +1,12 @@
 import React from "react";
 import {
     Box,
-    Flex,
     Text,
-    Button,
-    SimpleGrid,
     Spinner,
-    VStack,
-    HStack,
 } from "@chakra-ui/react";
-import ScheduleCard from "../ScheduleCard/ScheduleCard";
+import { useQuery } from '@tanstack/react-query';
 import axios from "axios";
-
-
-
+import ScheduleCard from "../ScheduleCard/ScheduleCard";
 
 interface Team {
     id: number;
@@ -35,63 +28,30 @@ interface Game {
     home_team: Team;
 }
 
-interface TodayScheduleProps {
-    isLoading: boolean;
-    setIsLoading: (loading: boolean) => void;
-}
-
-
-const TodaySchedule: React.FC<TodayScheduleProps> = ({ setIsLoading }) => {
-
-    const [gamesData, setGamesData] = React.useState<Game[]>([]);
-    const [error, setError] = React.useState<string | null>(null);
+const TodaySchedule: React.FC = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
 
-    React.useEffect(() => {
-        fetchTodaySchedule();
-    }, []);
-
-    function saveScheduleToStorage(gamesData: Game[]) {
-        localStorage.setItem("todaySchedule", JSON.stringify(gamesData));
-    }
-
-
-    const fetchTodaySchedule = async () => {
-
-        const isScheduleCached = localStorage.getItem("todaySchedule");
-
-        if (isScheduleCached) {
-            setGamesData(JSON.parse(isScheduleCached));
-            setIsLoading(false);
-            return;
-        }
-        setIsLoading(true);
-        await axios.get<Game[]>(`${apiUrl}/schedule_today`)
-            .then((response) => {
-                setGamesData(response.data);
-                saveScheduleToStorage(response.data);
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching today's games:", error);
-                setError("An error occurred while fetching today's games.");
-                setIsLoading(false);
-                setGamesData([]);
-            });
-    }
+    const { data: gamesData = [], error, isLoading } = useQuery<Game[], Error>({
+        queryKey: ['todaySchedule'],
+        queryFn: async () => {
+            const response = await axios.get<Game[]>(`${apiUrl}/schedule_today`);
+            return response.data;
+        },
+        staleTime: 1000 * 60 * 10, 
+    });
 
     if (error) {
         return (
             <Box>
-                <Text>{error}</Text>
+                <Text color="red.500">An error occurred while fetching today's games.</Text>
             </Box>
         );
     }
 
-    if (gamesData.length === 0) {
+    if (isLoading) {
         return (
-            <Box>
-                <Spinner />
+            <Box display="flex" justifyContent="center">
+                <Spinner size="xl" color="red.500" />
             </Box>
         );
     }
@@ -106,8 +66,8 @@ const TodaySchedule: React.FC<TodayScheduleProps> = ({ setIsLoading }) => {
             <ScheduleCard GamesData={gamesData} />
         </div>
     );
+};
 
-}
 export default TodaySchedule;
 
 
