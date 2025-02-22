@@ -1,29 +1,18 @@
 import React from "react";
-import { Box, Text, Link } from "@chakra-ui/react";
+import { Box, Link, Text } from "@chakra-ui/react";
+import { THEME } from '../../../constants';
 
-interface FooterComponentProps {
-  isLoading: boolean;
-}
-
-const FooterComponent: React.FC<FooterComponentProps> = ({ isLoading }) => {
-  if (isLoading) {
-    return null;
-  }
-
+const FooterComponent: React.FC = () => {
   return (
     <Box
       as="footer"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      bg="gray.800"
-      color="gray.300"
       position="fixed"
       bottom={0}
       width="100%"
-      height="60px"
-      boxShadow="0px -2px 5px rgba(0, 0, 0, 0.2)"
-      fontSize="sm"
+      bg={THEME.colors.navBackground}
+      color="white"
+      p={4}
+      textAlign="center"
       borderTop="1px solid"
       borderColor="gray.700"
     >

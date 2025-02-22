@@ -10,8 +10,6 @@ import { FaChartLine } from 'react-icons/fa';
 import { Icon } from '@chakra-ui/react';
 
 export const StartPage: React.FC = () => {
-    const [isLoading, setIsLoading] = React.useState(true);
-
     return (
         <Box position="relative" minHeight="100vh" bg={THEME.colors.background} width="100%">
             <NavBar />
@@ -81,7 +79,6 @@ export const StartPage: React.FC = () => {
                 </GridItem>
             </Grid>
             <Grid mb={"2rem"}>
-
                 <GridItem colSpan={12}>
                     <Box
                         bg="rgba(30, 30, 47, 0.9)"
@@ -94,8 +91,7 @@ export const StartPage: React.FC = () => {
                 </GridItem>
             </Grid>
 
-            <FooterComponent isLoading={isLoading} />
-
+            <FooterComponent />
         </Box>
     );
 };
