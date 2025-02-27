@@ -38,7 +38,7 @@ export const StartPage: React.FC = () => {
                             letterSpacing="wide"
                         >
                             <Text as="span" color={THEME.colors.accent}>MLB</Text> First 5 Innings
-                            <Text fontSize={["xl", "2xl", "3xl"]} color=".800" mt={2}>
+                            <Text fontSize={["xl", "2xl", "3xl"]} color="white" mt={2}>
                                 Advanced Betting Analytics
                             </Text>
                         </Heading>

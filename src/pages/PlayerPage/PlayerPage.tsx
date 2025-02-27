@@ -8,10 +8,16 @@ import {
     Avatar,
     SimpleGrid,
     Flex,
+    Tabs,
+    TabList,
+    TabPanels,
+    Tab,
+    TabPanel,
 } from '@chakra-ui/react';
 import { NavBar } from '../../components/Layout/NavBar';
 import PlayerSearch from '../../components/PlayerSearch/PlayerSearch';
 import PlayerStats from '../../components/PlayerStats/PlayerStats';
+import PlayerBettingStats from '../../components/PlayerBettingStats/PlayerBettingStats';
 import FooterComponent from '../../components/Layout/Footer/Footer';
 import { THEME } from '../../constants';
 
@@ -19,7 +25,7 @@ const popularPlayers = [
     { id: 592450, name: "Aaron Judge", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/592450/headshot/67/current" },
     { id: 660271, name: "Shohei Ohtani", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/660271/headshot/67/current" },
     { id: 608331, name: "Max Fried", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/608331/headshot/67/current" },
-    { id: 669373, name: "Tarik Skuba", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/669373/headshot/67/current" },
+    { id: 669373, name: "Tarik Skubal", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/669373/headshot/67/current" },
     { id: 547180, name: "Bryce Harper", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/547180/headshot/67/current" },
     { id: 660670, name: "Ronald Acuña Jr.", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/660670/headshot/67/current" },
     { id: 608369, name: "Corey Seager", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/608369/headshot/67/current" },
@@ -40,8 +46,13 @@ const popularPlayers = [
 const PlayerPage: React.FC = () => {
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
     const [selectedSeason, setSelectedSeason] = useState('2024');
+    const [bettingGamesCount, setBettingGamesCount] = useState(5);
     const currentYear = new Date().getFullYear();
+   // const currentSeason = currentYear.toString();
+   const currentSeason = "2024";
     const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+    
+    const isCurrentSeason = selectedSeason === currentSeason;
 
     return (
         <Box minHeight="100vh" bg="gray.900">
@@ -61,7 +72,7 @@ const PlayerPage: React.FC = () => {
                             fontFamily={THEME.fonts.body}
                         >
                             {seasons.map((year) => (
-                                <option key={year} value={year} color="red">
+                                <option key={year} value={year}>
                                     {year} Season
                                 </option>
                             ))}
@@ -101,16 +112,41 @@ const PlayerPage: React.FC = () => {
                         </Box>
                     )}
 
-
                     {selectedPlayerId && (
-                        <PlayerStats
-                            playerId={selectedPlayerId}
-                            season={selectedSeason}
-                        />
+                        <>
+                            {isCurrentSeason ? (
+                                <Tabs variant="enclosed" colorScheme="red">
+                                    <TabList>
+                                        <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Player Stats</Tab>
+                                        <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Betting Analysis</Tab>
+                                    </TabList>
+                                    <TabPanels>
+                                        <TabPanel p={0} pt={4}>
+                                            <PlayerStats
+                                                playerId={selectedPlayerId}
+                                                season={selectedSeason}
+                                            />
+                                        </TabPanel>
+                                        <TabPanel p={0} pt={4}>
+                                            <PlayerBettingStats
+                                                playerId={selectedPlayerId}
+                                                gamesCount={bettingGamesCount}
+                                                onGamesCountChange={setBettingGamesCount}
+                                            />
+                                        </TabPanel>
+                                    </TabPanels>
+                                </Tabs>
+                            ) : (
+                                <PlayerStats
+                                    playerId={selectedPlayerId}
+                                    season={selectedSeason}
+                                />
+                            )}
+                        </>
                     )}
                 </VStack>
             </Container>
-            <FooterComponent isLoading={false} />
+            <FooterComponent/>
         </Box>
     );
 };
