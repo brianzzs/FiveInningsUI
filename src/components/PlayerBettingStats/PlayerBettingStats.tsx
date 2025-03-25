@@ -69,7 +69,6 @@ const StatCard = ({ title, value }: { title: string; value: number }) => (
 );
 
 const HitterStats = ({ stats }: { stats: Record<string, number> }) => {
-    // Group stats by category
     const hitsStats = {
         'Over 0.5 Hits': stats.over_0_5_hits,
         'Over 1.5 Hits': stats.over_1_5_hits,
@@ -148,7 +147,6 @@ const HitterStats = ({ stats }: { stats: Record<string, number> }) => {
 };
 
 const PitcherStats = ({ stats }: { stats: Record<string, number> }) => {
-    // Group pitcher stats by category
     const strikeoutStats = {
         'Over 3.5 Strikeouts': stats.over_3_5_strikeouts,
         'Over 4.5 Strikeouts': stats.over_4_5_strikeouts,

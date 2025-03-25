@@ -1,13 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/baseball-ball-sport-free-svg-file-SvgHeart.Com.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Five Innings</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/baseball-ball-sport-free-svg-file-SvgHeart.Com.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Five Innings</title>
+  <script type="module">
+    import { GOOGLE_ANALYTICS_ID } from '/src/config.js';
+    const gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`;
+    document.head.appendChild(gaScript);
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', GOOGLE_ANALYTICS_ID);
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -20,6 +20,7 @@ import PlayerStats from '../../components/PlayerStats/PlayerStats';
 import PlayerBettingStats from '../../components/PlayerBettingStats/PlayerBettingStats';
 import FooterComponent from '../../components/Layout/Footer/Footer';
 import { THEME } from '../../constants';
+import { logEvent } from '../../utils/analytics';
 
 const popularPlayers = [
     { id: 592450, name: "Aaron Judge", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/592450/headshot/67/current" },
@@ -49,10 +50,29 @@ const PlayerPage: React.FC = () => {
     const [bettingGamesCount, setBettingGamesCount] = useState(5);
     const currentYear = new Date().getFullYear();
    // const currentSeason = currentYear.toString();
-   const currentSeason = "2024";
+   const currentSeason = "2025";
     const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
     
     const isCurrentSeason = selectedSeason === currentSeason;
+
+    const handlePlayerSelect = (playerId: number) => {
+        setSelectedPlayerId(playerId);
+        setSelectedSeason('2025');
+        
+        logEvent('player_selected', {
+            player_id: playerId,
+            season: '2025'
+        });
+    };
+
+    const handleSeasonChange = (season: string) => {
+        setSelectedSeason(season);
+        
+        logEvent('season_changed', {
+            player_id: selectedPlayerId,
+            season: season
+        });
+    };
 
     return (
         <Box minHeight="100vh" bg="gray.900">
@@ -64,7 +84,7 @@ const PlayerPage: React.FC = () => {
                     {selectedPlayerId && (
                         <Select
                             value={selectedSeason}
-                            onChange={(e) => setSelectedSeason(e.target.value)}
+                            onChange={(e) => handleSeasonChange(e.target.value)}
                             bg="gray.700"
                             color="red.500"
                             maxW="200px"
@@ -95,10 +115,7 @@ const PlayerPage: React.FC = () => {
                                         p={4}
                                         borderRadius="lg"
                                         cursor="pointer"
-                                        onClick={() => {
-                                            setSelectedPlayerId(player.id);
-                                            setSelectedSeason('2024');
-                                        }}
+                                        onClick={() => handlePlayerSelect(player.id)}
                                         _hover={{ bg: 'gray.600', transform: 'scale(1.05)' }}
                                         transition="all 0.2s"
                                     >
