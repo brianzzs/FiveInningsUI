@@ -8,15 +8,20 @@
   <title>Five Innings</title>
   <script type="module">
     import { GOOGLE_ANALYTICS_ID } from '/src/config.js';
-    const gaScript = document.createElement('script');
-    gaScript.async = true;
-    gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`;
-    document.head.appendChild(gaScript);
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', GOOGLE_ANALYTICS_ID);
+    if (GOOGLE_ANALYTICS_ID) {
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`;
+      document.head.appendChild(gaScript);
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', GOOGLE_ANALYTICS_ID);
+      console.log('Google Analytics initialized with ID:', GOOGLE_ANALYTICS_ID);
+    } else {
+      console.warn('Google Analytics ID not found in environment variables');
+    }
   </script>
 </head>
 

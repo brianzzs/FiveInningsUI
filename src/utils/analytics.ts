@@ -1,5 +1,4 @@
-
-export const GA_MEASUREMENT_ID = import.meta.env.GOOGLE_ANALYTICS_ID; 
+export const GA_MEASUREMENT_ID = import.meta.env.VITE_GOOGLE_ANALYTICS_ID; 
 
 declare global {
     interface Window {
