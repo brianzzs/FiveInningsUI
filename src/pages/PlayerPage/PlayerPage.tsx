@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Container,
@@ -14,6 +14,7 @@ import {
     Tab,
     TabPanel,
 } from '@chakra-ui/react';
+import { useLocation } from 'react-router-dom';
 import { NavBar } from '../../components/Layout/NavBar';
 import PlayerSearch from '../../components/PlayerSearch/PlayerSearch';
 import PlayerStats from '../../components/PlayerStats/PlayerStats';
@@ -45,15 +46,23 @@ const popularPlayers = [
 ];
 
 const PlayerPage: React.FC = () => {
+    const location = useLocation();
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
     const [selectedSeason, setSelectedSeason] = useState('2024');
     const [bettingGamesCount, setBettingGamesCount] = useState(5);
     const currentYear = new Date().getFullYear();
-   // const currentSeason = currentYear.toString();
-   const currentSeason = "2025";
+    const currentSeason = "2025";
     const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
     
     const isCurrentSeason = selectedSeason === currentSeason;
+
+    useEffect(() => {
+        const state = location.state as { selectedPlayerId?: number } | null;
+        if (state?.selectedPlayerId) {
+            setSelectedPlayerId(state.selectedPlayerId);
+            setSelectedSeason('2025');
+        }
+    }, [location]);
 
     const handlePlayerSelect = (playerId: number) => {
         setSelectedPlayerId(playerId);

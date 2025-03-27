@@ -9,6 +9,7 @@ import {
   Icon,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaUser, FaChartLine, FaBaseballBall, FaClock } from "react-icons/fa";
 import TeamLogo from "../TeamLogo/TeamLogo";
@@ -25,6 +26,7 @@ interface Team {
     wins: number;
     losses: number;
     era: number;
+    id: number;
   };
 }
 
@@ -38,6 +40,7 @@ interface NextScheduledGameProps {
   teamId: number;
   fetchGame: boolean;
   onFetchComplete?: () => void;
+  onPitcherSelect: (playerId: number) => void;
 }
 
 interface NextScheduledGameState {
@@ -162,7 +165,14 @@ class NextScheduledGame extends React.Component<
                 {[
                   {
                     icon: FaUser,
-                    label: `${scheduledGame.away_team.probable_pitcher.name} (${scheduledGame.away_team.probable_pitcher.hand})`,
+                    label: (
+                      <Text 
+                        _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                        onClick={() => this.props.onPitcherSelect(scheduledGame.away_team.probable_pitcher.id)}
+                      >
+                        {scheduledGame.away_team.probable_pitcher.name} ({scheduledGame.away_team.probable_pitcher.hand})
+                      </Text>
+                    ),
                   },
                   {
                     icon: FaChartLine,
@@ -175,7 +185,7 @@ class NextScheduledGame extends React.Component<
                 ].map((item, index) => (
                   <VStack key={index} align="center" w="30%">
                     <Icon as={item.icon} boxSize={6} />
-                    <Text fontSize="sm">{item.label}</Text>
+                    {typeof item.label === 'string' ? <Text fontSize="sm">{item.label}</Text> : item.label}
                   </VStack>
                 ))}
 
@@ -186,7 +196,14 @@ class NextScheduledGame extends React.Component<
                 {[
                   {
                     icon: FaUser,
-                    label: `${scheduledGame.home_team.probable_pitcher.name} (${scheduledGame.home_team.probable_pitcher.hand})`,
+                    label: (
+                      <Text 
+                        _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                        onClick={() => this.props.onPitcherSelect(scheduledGame.home_team.probable_pitcher.id)}
+                      >
+                        {scheduledGame.home_team.probable_pitcher.name} ({scheduledGame.home_team.probable_pitcher.hand})
+                      </Text>
+                    ),
                   },
                   {
                     icon: FaChartLine,
@@ -199,7 +216,7 @@ class NextScheduledGame extends React.Component<
                 ].map((item, index) => (
                   <VStack key={index} align="center" w="30%">
                     <Icon as={item.icon} boxSize={6} />
-                    <Text fontSize="sm">{item.label}</Text>
+                    {typeof item.label === 'string' ? <Text fontSize="sm">{item.label}</Text> : item.label}
                   </VStack>
                 ))}
               </Flex>

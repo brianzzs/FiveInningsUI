@@ -33,6 +33,7 @@ interface Team {
         wins: number;
         losses: number;
         era: number;
+        id: number;
     };
 }
 
@@ -44,9 +45,10 @@ interface Game {
 
 interface TodayScheduleProps {
     GamesData: Game[];
+    onPitcherSelect: (playerId: number) => void;
 }
 
-const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
+const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
     if (GamesData.length === 0) {
         return (
             <Flex direction="column" justify="center" align="center" height="50vh" bg="#2c323a">
@@ -109,7 +111,12 @@ const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
                                     <Td>
                                         <HStack>
                                             <MdPerson />
-                                            <Text>{game.away_team.probable_pitcher.name}</Text>
+                                            <Text 
+                                                _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                                                onClick={() => onPitcherSelect(game.away_team.probable_pitcher.id)}
+                                            >
+                                                {game.away_team.probable_pitcher.name}
+                                            </Text>
                                             <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.away_team.name)})</Text>
                                         </HStack>
                                     </Td>
@@ -137,7 +144,12 @@ const ScheduleCard = ({ GamesData }: TodayScheduleProps) => {
                                     <Td>
                                         <HStack>
                                             <MdPerson />
-                                            <Text>{game.home_team.probable_pitcher.name}</Text>
+                                            <Text 
+                                                _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                                                onClick={() => onPitcherSelect(game.home_team.probable_pitcher.id)}
+                                            >
+                                                {game.home_team.probable_pitcher.name}
+                                            </Text>
                                             <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.home_team.name)})</Text>
                                         </HStack>
                                     </Td>

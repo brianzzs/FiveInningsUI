@@ -7,6 +7,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import axios from "axios";
 import ScheduleCard from "../ScheduleCard/ScheduleCard";
+import { useNavigate } from "react-router-dom";
 
 interface Team {
     id: number;
@@ -19,6 +20,7 @@ interface Team {
         wins: number;
         losses: number;
         era: number;
+        id: number;
     };
 }
 
@@ -30,6 +32,7 @@ interface Game {
 
 const TodaySchedule: React.FC = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
+    const navigate = useNavigate();
 
     const { data: gamesData = [], error, isLoading } = useQuery<Game[], Error>({
         queryKey: ['todaySchedule'],
@@ -39,6 +42,10 @@ const TodaySchedule: React.FC = () => {
         },
         staleTime: 1000 * 60 * 10, 
     });
+
+    const handlePitcherSelect = (playerId: number) => {
+        navigate(`/players`, { state: { selectedPlayerId: playerId } });
+    };
 
     if (error) {
         return (
@@ -63,7 +70,7 @@ const TodaySchedule: React.FC = () => {
                     Next Scheduled Games
                 </Text>
             </Box>
-            <ScheduleCard GamesData={gamesData} />
+            <ScheduleCard GamesData={gamesData} onPitcherSelect={handlePitcherSelect} />
         </div>
     );
 };
