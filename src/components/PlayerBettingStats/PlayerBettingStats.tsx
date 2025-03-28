@@ -233,6 +233,9 @@ const GameLog = ({ games, playerType }: { games: Array<any>, playerType: string 
                         <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
                     </Flex>
                     <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">Runs: {game.runs_allowed}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
                         <Text fontWeight="bold">H: {game.hits_allowed}</Text>
                     </Flex>
                     <Flex align="center" gap={2}>

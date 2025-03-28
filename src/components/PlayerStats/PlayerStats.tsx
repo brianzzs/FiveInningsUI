@@ -69,6 +69,7 @@ interface RecentHittingGame {
 interface RecentPitchingGame {
     game_date: string;
     hits_allowed: number;
+    runs: number;
     home_runs_allowed: number;
     innings_pitched: string;
     opponent_team: string;
@@ -489,6 +490,10 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                                             <Flex align="center" gap={2}>
                                                 <MdSportsBaseball />
                                                 <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
+                                            </Flex>
+                                            <Flex align="center" gap={2}>
+                                                <MdSportsBaseball />
+                                                <Text fontWeight="bold">Earned Runs: {game.runs}</Text>
                                             </Flex>
                                             <Flex align="center" gap={2}>
                                                 <FaBaseballBatBall />
