@@ -35,6 +35,21 @@ interface PlayerStatsProps {
     season: string;
     onTeamIdSet?: (teamId: number) => void;
     onError?: () => void;
+    onSeasonChange: (season: string) => void;
+}
+
+interface HittingStatsProps {
+    stats: NonNullable<PlayerStats['hitting_stats']>;
+    season: string;
+    onSeasonChange: (season: string) => void;
+    seasons: string[];
+}
+
+interface PitchingStatsProps {
+    stats: PlayerStats;
+    seasonYear: string;
+    onSeasonChange: (season: string) => void;
+    seasons: string[];
 }
 
 interface RecentHittingGame {
@@ -75,10 +90,26 @@ const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, v
     </Stat>
 );
 
-const HittingStats: React.FC<{ stats: NonNullable<PlayerStats['hitting_stats']>, season: string }> = ({ stats, season }) => (
+const HittingStats: React.FC<HittingStatsProps> = ({ stats, season, onSeasonChange, seasons }) => (
     <>
         <Box>
-            <Heading size="md" mb={4}>Season Stats ({season})</Heading>
+            <Flex justify="space-between" align="center" mb={4}>
+                <Heading size="md">Season Stats ({season})</Heading>
+                <Select
+                    value={season}
+                    onChange={(e) => onSeasonChange(e.target.value)}
+                    bg="gray.700"
+                    color="red.500"
+                    maxW="200px"
+                    fontFamily={THEME.fonts.body}
+                >
+                    {seasons.map((year) => (
+                        <option key={year} value={year}>
+                            {year} Season
+                        </option>
+                    ))}
+                </Select>
+            </Flex>
             <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                 <StatBox label="AVG" value={stats.season.avg} />
                 <StatBox label="HR" value={stats.season.home_runs} />
@@ -109,17 +140,30 @@ const HittingStats: React.FC<{ stats: NonNullable<PlayerStats['hitting_stats']>,
     </>
 );
 
-const PitchingStats: React.FC<{
-    stats: PlayerStats,
-    seasonYear: string
-}> = ({ stats, seasonYear }) => {
+const PitchingStats: React.FC<PitchingStatsProps> = ({ stats, seasonYear, onSeasonChange, seasons }) => {
     const career = stats.pitching_stats?.career || stats.career_stats;
     const season = stats.pitching_stats?.season || stats.season_stats;
 
     return (
         <>
             <Box>
-                <Heading size="md" mb={4}>Season Pitching Stats ({seasonYear})</Heading>
+                <Flex justify="space-between" align="center" mb={4}>
+                    <Heading size="md">Season Pitching Stats ({seasonYear})</Heading>
+                    <Select
+                        value={seasonYear}
+                        onChange={(e) => onSeasonChange(e.target.value)}
+                        bg="gray.700"
+                        color="red.500"
+                        maxW="200px"
+                        fontFamily={THEME.fonts.body}
+                    >
+                        {seasons.map((year) => (
+                            <option key={year} value={year}>
+                                {year} Season
+                            </option>
+                        ))}
+                    </Select>
+                </Flex>
                 <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
                     <StatBox label="ERA" value={season?.era ?? '-'} />
                     <StatBox label="W-L" value={`${season?.wins ?? 0}-${season?.losses ?? 0}`} />
@@ -151,8 +195,23 @@ const PitchingStats: React.FC<{
     );
 };
 
-const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet, onError }) => {
+const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet, onError, onSeasonChange }) => {
     const [gamesCount, setGamesCount] = useState<number>(2);
+    const currentYear = new Date().getFullYear();
+    const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
+
+    // Separate query for player info to get team ID even when stats are unavailable
+    const { data: playerInfo } = useQuery({
+        queryKey: ['playerInfo', playerId],
+        queryFn: async () => {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/info/${playerId}`);
+            if (response.data.error) {
+                throw new Error(response.data.error);
+            }
+            return response.data;
+        },
+        enabled: !!playerId,
+    });
 
     const { data: stats, isLoading, error } = useQuery<PlayerStats, Error>({
         queryKey: ['playerStats', playerId, season],
@@ -166,6 +225,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
             } catch (error) {
                 if (season === '2025' && onError) {
                     onError();
+                    onSeasonChange('2024');
                 }
                 throw error;
             }
@@ -173,138 +233,226 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
         retry: false
     });
 
-    const { data: recentStats, isLoading: isLoadingRecent } = useQuery({
+    const isRookie = error && (season === '2024' || season === '2025');
+
+    const { data: recentStats, isLoading: isLoadingRecent, error: recentStatsError } = useQuery({
         queryKey: ['recentStats', playerId, gamesCount],
         queryFn: async () => {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/recent-stats/${playerId}/${gamesCount}`);
+            if (response.data.error) {
+                throw new Error(response.data.error);
+            }
             return response.data as RecentStats;
         },
         enabled: !!playerId,
     });
 
     useEffect(() => {
-        if (stats?.player_info?.current_team && onTeamIdSet) {
-            const teamId = getTeamIdFromName(stats.player_info.current_team);
+        // Set team ID from either stats or playerInfo
+        const teamName = stats?.player_info?.current_team || playerInfo?.current_team;
+        if (teamName && onTeamIdSet) {
+            const teamId = getTeamIdFromName(teamName);
             onTeamIdSet(teamId);
         }
-    }, [stats, onTeamIdSet]);
+    }, [stats, playerInfo, onTeamIdSet]);
 
-    if (isLoading || !stats) return <Spinner />;
+    const renderSeasonStats = () => {
+        if (isLoading) {
+            return (
+                <Box display="flex" justifyContent="center" p={8}>
+                    <Spinner size="xl" color="white" />
+                </Box>
+            );
+        }
 
-    const isPitcher = stats.player_info.position === 'P';
-    const isTwoWayPlayer = stats.player_info.position === 'TWP';
+        if (error) {
+            return (
+                <Box p={4} bg="gray.700" borderRadius="md" textAlign="center">
+                    <Text fontSize="lg" color="yellow.400">
+                        {isRookie 
+                            ? "No season stats available yet for this player!"
+                            : "Player doesn't have stats currently!"}
+                    </Text>
+                </Box>
+            );
+        }
 
-    const hasHittingStats = (stats: PlayerStats) => {
-        return stats.career_stats?.avg !== undefined || stats.hitting_stats !== undefined;
-    };
+        if (!stats) {
+            return null;
+        }
 
-    const hasPitchingStats = (stats: PlayerStats) => {
-        return stats.career_stats?.era !== undefined;
-    };
+        const isPitcher = stats.player_info?.position === 'P';
+        const isTwoWayPlayer = stats.player_info?.position === 'TWP';
 
-    const createHittingStatsObject = (stats: PlayerStats) => {
-        if (stats.hitting_stats) return stats.hitting_stats;
-
-        return {
-            career: {
-                games: stats.career_stats!.games,
-                at_bats: stats.career_stats!.at_bats!,
-                hits: stats.career_stats!.hits!,
-                avg: stats.career_stats!.avg!,
-                home_runs: stats.career_stats!.home_runs!,
-                rbi: stats.career_stats!.rbi!,
-                runs: stats.career_stats!.runs!,
-                stolen_bases: stats.career_stats!.stolen_bases!,
-                obp: stats.career_stats!.obp!,
-                slg: stats.career_stats!.slg!,
-                ops: stats.career_stats!.ops!,
-            },
-            season: {
-                games: stats.season_stats!.games,
-                at_bats: stats.season_stats!.at_bats!,
-                hits: stats.season_stats!.hits!,
-                avg: stats.season_stats!.avg!,
-                home_runs: stats.season_stats!.home_runs!,
-                rbi: stats.season_stats!.rbi!,
-                runs: stats.season_stats!.runs!,
-                stolen_bases: stats.season_stats!.stolen_bases!,
-                obp: stats.season_stats!.obp!,
-                slg: stats.season_stats!.slg!,
-                ops: stats.season_stats!.ops!,
-            }
+        const hasHittingStats = (stats: PlayerStats) => {
+            return stats.career_stats?.avg !== undefined || stats.hitting_stats !== undefined;
         };
+
+        const hasPitchingStats = (stats: PlayerStats) => {
+            return stats.career_stats?.era !== undefined;
+        };
+
+        const createHittingStatsObject = (stats: PlayerStats) => {
+            if (stats.hitting_stats) return stats.hitting_stats;
+
+            return {
+                career: {
+                    games: String(stats.career_stats?.games ?? 0),
+                    at_bats: String(stats.career_stats?.at_bats ?? 0),
+                    hits: String(stats.career_stats?.hits ?? 0),
+                    avg: String(stats.career_stats?.avg ?? 0),
+                    home_runs: String(stats.career_stats?.home_runs ?? 0),
+                    rbi: String(stats.career_stats?.rbi ?? 0),
+                    runs: String(stats.career_stats?.runs ?? 0),
+                    stolen_bases: String(stats.career_stats?.stolen_bases ?? 0),
+                    obp: String(stats.career_stats?.obp ?? 0),
+                    slg: String(stats.career_stats?.slg ?? 0),
+                    ops: String(stats.career_stats?.ops ?? 0),
+                },
+                season: {
+                    games: String(stats.season_stats?.games ?? 0),
+                    at_bats: String(stats.season_stats?.at_bats ?? 0),
+                    hits: String(stats.season_stats?.hits ?? 0),
+                    avg: String(stats.season_stats?.avg ?? 0),
+                    home_runs: String(stats.season_stats?.home_runs ?? 0),
+                    rbi: String(stats.season_stats?.rbi ?? 0),
+                    runs: String(stats.season_stats?.runs ?? 0),
+                    stolen_bases: String(stats.season_stats?.stolen_bases ?? 0),
+                    obp: String(stats.season_stats?.obp ?? 0),
+                    slg: String(stats.season_stats?.slg ?? 0),
+                    ops: String(stats.season_stats?.ops ?? 0),
+                }
+            };
+        };
+
+        const showHittingStats = hasHittingStats(stats);
+        const showPitchingStats = hasPitchingStats(stats);
+
+        if (isTwoWayPlayer) {
+            return (
+                <Tabs variant="enclosed">
+                    <TabList pb={4}>
+                        <Tab>Hitting</Tab>
+                        <Tab>Pitching</Tab>
+                    </TabList>
+                    <TabPanels>
+                        <TabPanel>
+                            <HittingStats
+                                stats={createHittingStatsObject(stats)}
+                                season={season}
+                                onSeasonChange={onSeasonChange}
+                                seasons={seasons}
+                            />
+                        </TabPanel>
+                        <TabPanel>
+                            <PitchingStats
+                                stats={stats}
+                                seasonYear={season}
+                                onSeasonChange={onSeasonChange}
+                                seasons={seasons}
+                            />
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+            );
+        } else if (isPitcher && showPitchingStats) {
+            return (
+                <PitchingStats
+                    stats={stats}
+                    seasonYear={season}
+                    onSeasonChange={onSeasonChange}
+                    seasons={seasons}
+                />
+            );
+        } else if (showHittingStats) {
+            return (
+                <HittingStats
+                    stats={createHittingStatsObject(stats)}
+                    season={season}
+                    onSeasonChange={onSeasonChange}
+                    seasons={seasons}
+                />
+            );
+        } else {
+            return (
+                <Text color="gray.400" textAlign="center" fontSize="lg">
+                    No statistics available for this player
+                </Text>
+            );
+        }
     };
 
-    const showHittingStats = hasHittingStats(stats);
-    const showPitchingStats = hasPitchingStats(stats);
+    // Get player info from either stats or the separate playerInfo query
+    const displayPlayerInfo = stats?.player_info || playerInfo;
 
     return (
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
             <VStack spacing={6} align="stretch">
+                {displayPlayerInfo && (
+                    <Grid
+                        templateColumns={{ base: "1fr", md: "auto 1fr" }}
+                        gap={6}
+                        bgImage={displayPlayerInfo.images?.action || 'none'}
+                        bgSize="cover"
+                        bgPosition="center 10%"
+                        bgRepeat="no-repeat"
+                        position="relative"
+                        _before={{
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            left: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            zIndex: 1,
+                        }}
+                    >
+                        <Box position="relative" zIndex={2} pl={1}>
+                            <Image
+                                src={displayPlayerInfo.images?.headshot}
+                                alt={displayPlayerInfo.full_name}
+                                borderRadius="md"
+                                maxW="200px"
+                            />
+                            <VStack align="start" spacing={4}>
+                                <Heading size="lg" fontWeight="bold" lineHeight="1.2">
+                                    {displayPlayerInfo.full_name}
+                                </Heading>
+                                <Text fontSize="sm" fontWeight="medium" color="gray.300">
+                                    Position: {displayPlayerInfo.position}
+                                </Text>
+                                <HStack spacing={4} flexWrap="wrap">
+                                    <Text fontWeight="bold">Age: {displayPlayerInfo.age}</Text>
+                                    <Text fontWeight="bold">Bats: {displayPlayerInfo.bat_side}</Text>
+                                    <Text fontWeight="bold">Throws: {displayPlayerInfo.throw_hand}</Text>
+                                    <Text fontWeight="bold">Team: {displayPlayerInfo.current_team}</Text>
+                                    <TeamLogo teamId={getTeamIdFromName(displayPlayerInfo.current_team)} size="35px" marginTop="auto" floatLeft={true} />
+                                </HStack>
+                            </VStack>
+                        </Box>
+                    </Grid>
+                )}
 
-                <Grid
-                    templateColumns={{ base: "1fr", md: "auto 1fr" }}
-                    gap={6}
-                    bgImage={stats.player_info.images.action || 'none'}
-                    bgSize="cover"
-                    bgPosition="center 10%"
-                    bgRepeat="no-repeat"
-                    position="relative"
-                    _before={{
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        zIndex: 1,
-                    }}
-                >
-                    <Box position="relative" zIndex={2} pl={1}>
-                        <Image
-                            src={stats.player_info.images.headshot}
-                            alt={stats.player_info.full_name}
-                            borderRadius="md"
-                            maxW="200px"
-                        />
-                        <VStack align="start" spacing={4}>
-                            <Heading size="lg" fontWeight="bold" lineHeight="1.2">
-                                {stats.player_info.full_name}
-                            </Heading>
-                            <Text fontSize="sm" fontWeight="medium" color="gray.300">
-                                Position: {stats.player_info.position}
-                            </Text>
-                            <HStack spacing={4} flexWrap="wrap">
-                                <Text fontWeight="bold">Age: {stats.player_info.age}</Text>
-                                <Text fontWeight="bold">Bats: {stats.player_info.bat_side}</Text>
-                                <Text fontWeight="bold">Throws: {stats.player_info.throw_hand}</Text>
-                                <Text fontWeight="bold" > Team: {stats.player_info.current_team}</Text>
-                                <TeamLogo teamId={getTeamIdFromName(stats.player_info.current_team)} size="35px" marginTop="auto" floatLeft={true} /> 
-                            </HStack>
-                        </VStack>
-                    </Box>
-                </Grid>
+                {!recentStatsError && recentStats?.recent_stats && recentStats.recent_stats.length > 0 && (
+                    <Box>
+                        <Flex justify="space-between" align="center" mb={4}>
+                            <Heading size="md">Last Games Stats</Heading>
+                            <Select
+                                value={gamesCount}
+                                onChange={(e) => setGamesCount(Number(e.target.value))}
+                                bg="gray.700"
+                                color="red.500"
+                                maxW="200px"
+                                alignSelf="center"
+                                fontFamily={THEME.fonts.body}
+                            >
+                                {[2, 5, 10, 15, 20].map(num => (
+                                    <option key={num} value={num}>Last {num} Games</option>
+                                ))}
+                            </Select>
+                        </Flex>
 
-                <Box>
-                    <Flex justify="space-between" align="center" mb={4}>
-                        <Heading size="md">Last Games Stats</Heading>
-                        <Select
-                            value={gamesCount}
-                            onChange={(e) => setGamesCount(Number(e.target.value))}
-                            bg="gray.700"
-                            color="red.500"
-                            maxW="200px"
-                            alignSelf="center"
-                            fontFamily={THEME.fonts.body}
-                        >
-                            {[2, 5, 10, 15, 20].map(num => (
-                                <option key={num} value={num}>Last {num} Games</option>
-                            ))}
-                        </Select>
-                    </Flex>
-
-                    {recentStats && (
                         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
                             {recentStats.recent_stats.map((game, index) => (
                                 <Box
@@ -379,49 +527,14 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                                 </Box>
                             ))}
                         </SimpleGrid>
-                    )}
-                </Box>
+                    </Box>
+                )}
 
                 <Divider />
 
-                {isTwoWayPlayer ? (
-                    <Tabs variant="enclosed" >
-                        <TabList pb={4}>
-                            <Tab>Hitting</Tab>
-                            <Tab>Pitching</Tab>
-                        </TabList>
-                        <TabPanels >
-                            <TabPanel  >
-                                <HittingStats
-                                    stats={createHittingStatsObject(stats)}
-                                    season={season}
-                                />
-                            </TabPanel>
-                            <TabPanel >
-                                <PitchingStats
-                                    stats={stats}
-                                    seasonYear={season}
-                                />
-                            </TabPanel>
-                        </TabPanels>
-                    </Tabs>
-                ) : isPitcher && showPitchingStats ? (
-                    <PitchingStats
-                        stats={stats}
-                        seasonYear={season}
-                    />
-                ) : showHittingStats ? (
-                    <HittingStats
-                        stats={createHittingStatsObject(stats)}
-                        season={season}
-                    />
-                ) : (
-                    <Text color="gray.400" textAlign="center" fontSize="lg">
-                        No statistics available for this player
-                    </Text>
-                )}
+                {renderSeasonStats()}
             </VStack>
-        </Box >
+        </Box>
     );
 };
 

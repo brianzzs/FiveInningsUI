@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     SimpleGrid,
@@ -14,10 +14,15 @@ import {
     TabPanels,
     Tab,
     TabPanel,
+    Button,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { THEME } from '../../constants';
+import { MdAccessTime, MdSportsBaseball, MdPerson } from 'react-icons/md';
+import { FaBaseballBall, FaRunning } from 'react-icons/fa';
+import TeamLogo from '../TeamLogo/TeamLogo';
+import { getTeamAbbreviation, getTeamIdFromName } from '../../constants/teams';
 
 interface BettingStatsProps {
     playerId: number;
@@ -219,17 +224,164 @@ const PitcherStats = ({ stats }: { stats: Record<string, number> }) => {
     );
 };
 
+const GameLog = ({ games, playerType }: { games: Array<any>, playerType: string }) => {
+    const renderGameStats = (game: any) => {
+        if (playerType === "Pitcher") {
+            return (
+                <SimpleGrid columns={2} spacing={2}>
+                    <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">H: {game.hits_allowed}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">BB: {game.walks_allowed}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <Text fontWeight="bold">HR: {game.home_runs_allowed}</Text>
+                    </Flex>
+                </SimpleGrid>
+            );
+        } else {
+            return (
+                <SimpleGrid columns={2} spacing={2}>
+                    <Flex align="center" gap={2}>
+                        <FaBaseballBall />
+                        <Text fontWeight="bold">H/AB: {game.hits}/{game.at_bats}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <MdSportsBaseball />
+                        <Text fontWeight="bold">HR: {game.home_runs}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <FaRunning />
+                        <Text fontWeight="bold">RBI: {game.rbis}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <FaRunning />
+                        <Text fontWeight="bold">R: {game.runs}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <MdPerson />
+                        <Text fontWeight="bold">K: {game.strikeouts}</Text>
+                    </Flex>
+                    <Flex align="center" gap={2}>
+                        <MdSportsBaseball />
+                        <Text fontWeight="bold">BB: {game.walks}</Text>
+                    </Flex>
+                </SimpleGrid>
+            );
+        }
+    };
+
+    return (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+            {games.map((game, index) => (
+                <Box
+                    key={index}
+                    p={4}
+                    bg="gray.700"
+                    borderRadius="md"
+                    _hover={{ transform: 'scale(1.02)' }}
+                    transition="all 0.2s"
+                >
+                    <Flex align="center" justify="space-between" mb={2}>
+                        <Flex align="center" gap={2}>
+                            <Text fontWeight="bold">
+                                vs {getTeamAbbreviation(game.opponent_team)}
+                            </Text>
+                            <TeamLogo teamId={getTeamIdFromName(game.opponent_team)} size="35px" marginTop="auto" />
+                        </Flex>
+                        <Flex align="center" gap={1}>
+                            <MdAccessTime />
+                            <Text fontSize="sm" color="gray.400">
+                                {new Date(game.game_date).toLocaleDateString()}
+                            </Text>
+                        </Flex>
+                    </Flex>
+                    {renderGameStats(game)}
+                </Box>
+            ))}
+        </SimpleGrid>
+    );
+};
+
+const calculateBettingStats = (games: Array<any>, playerType: string) => {
+    const stats: Record<string, number> = {};
+    
+    if (playerType === "Pitcher") {
+        // Calculate pitcher stats
+        const totalGames = games.length;
+        stats.over_3_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 3.5).length / totalGames) * 100);
+        stats.over_4_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 4.5).length / totalGames) * 100);
+        stats.over_5_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 5.5).length / totalGames) * 100);
+        stats.over_6_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 6.5).length / totalGames) * 100);
+        stats.over_7_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 7.5).length / totalGames) * 100);
+        stats.over_8_5_strikeouts = Math.round((games.filter(g => g.strikeouts > 8.5).length / totalGames) * 100);
+
+        stats.over_4_5_innings_pitched = Math.round((games.filter(g => parseFloat(g.innings_pitched) > 4.5).length / totalGames) * 100);
+        stats.over_5_5_innings_pitched = Math.round((games.filter(g => parseFloat(g.innings_pitched) > 5.5).length / totalGames) * 100);
+        stats.over_6_5_innings_pitched = Math.round((games.filter(g => parseFloat(g.innings_pitched) > 6.5).length / totalGames) * 100);
+
+        stats.over_3_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 3.5).length / totalGames) * 100);
+        stats.over_4_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 4.5).length / totalGames) * 100);
+        stats.over_5_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 5.5).length / totalGames) * 100);
+        stats.over_6_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 6.5).length / totalGames) * 100);
+        stats.over_7_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 7.5).length / totalGames) * 100);
+        stats.over_8_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 8.5).length / totalGames) * 100);
+        stats.over_9_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 9.5).length / totalGames) * 100);
+
+        stats.over_1_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 1.5).length / totalGames) * 100);
+        stats.over_2_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 2.5).length / totalGames) * 100);
+        stats.over_3_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 3.5).length / totalGames) * 100);
+        stats.over_4_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 4.5).length / totalGames) * 100);
+        stats.over_5_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 5.5).length / totalGames) * 100);
+    } else {
+        // Calculate hitter stats
+        const totalGames = games.length;
+        stats.over_0_5_hits = Math.round((games.filter(g => g.hits > 0.5).length / totalGames) * 100);
+        stats.over_1_5_hits = Math.round((games.filter(g => g.hits > 1.5).length / totalGames) * 100);
+        stats.over_2_5_hits = Math.round((games.filter(g => g.hits > 2.5).length / totalGames) * 100);
+
+        stats.over_0_5_rbis = Math.round((games.filter(g => g.rbis > 0.5).length / totalGames) * 100);
+        stats.over_1_5_rbis = Math.round((games.filter(g => g.rbis > 1.5).length / totalGames) * 100);
+        stats.over_2_5_rbis = Math.round((games.filter(g => g.rbis > 2.5).length / totalGames) * 100);
+
+        stats.over_1_5_total_bases = Math.round((games.filter(g => g.total_bases > 1.5).length / totalGames) * 100);
+        stats.over_2_5_total_bases = Math.round((games.filter(g => g.total_bases > 2.5).length / totalGames) * 100);
+        stats.over_3_5_total_bases = Math.round((games.filter(g => g.total_bases > 3.5).length / totalGames) * 100);
+
+        stats.over_1_5_hits_runs_rbis = Math.round((games.filter(g => g.hits + g.runs + g.rbis > 1.5).length / totalGames) * 100);
+        stats.over_2_5_hits_runs_rbis = Math.round((games.filter(g => g.hits + g.runs + g.rbis > 2.5).length / totalGames) * 100);
+        stats.over_3_5_hits_runs_rbis = Math.round((games.filter(g => g.hits + g.runs + g.rbis > 3.5).length / totalGames) * 100);
+        stats.over_4_5_hits_runs_rbis = Math.round((games.filter(g => g.hits + g.runs + g.rbis > 4.5).length / totalGames) * 100);
+
+        stats.over_0_5_home_runs = Math.round((games.filter(g => g.home_runs > 0.5).length / totalGames) * 100);
+    }
+
+    return stats;
+};
+
 const PlayerBettingStats: React.FC<BettingStatsProps> = ({ 
     playerId, 
     gamesCount,
     onGamesCountChange
 }) => {
+    const [showGameLog, setShowGameLog] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
     const { data, isLoading, error } = useQuery<BettingStats>({
-        queryKey: ['playerBettingStats', playerId, gamesCount],
+        queryKey: ['playerBettingStats', playerId],
         queryFn: async () => {
             const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/player/betting-stats/${playerId}/${gamesCount}`
+                `${import.meta.env.VITE_API_URL}/player/betting-stats/${playerId}/20`
             );
+            if (response.data.error) {
+                throw new Error(response.data.error);
+            }
             return response.data;
         },
         enabled: !!playerId,
@@ -238,27 +390,44 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
     if (isLoading) {
         return (
             <Box display="flex" justifyContent="center" p={8}>
-                <Spinner size="xl" color="red.500" />
+                <Spinner size="xl" color="white" />
             </Box>
         );
     }
 
     if (error || !data) {
         return (
-            <Box p={4} bg="red.900" color="white" borderRadius="md">
-                <Text>Error loading betting statistics</Text>
+            <Box p={6} bg="gray.800" borderRadius="xl" color="white">
+                <Text fontSize="lg" textAlign="center" color="red.400">
+                    {error?.message === 'Error fetching recent player stats: list index out of range'
+                        ? "Player doesn't have any recent games to analyze"
+                        : "Error loading betting statistics. Please try again later."}
+                </Text>
             </Box>
         );
     }
 
+    const totalGames = data.games_found || 0;
+    
+    const getAvailableGameCounts = () => {
+        const counts = [1, 5, 7, 10, 15, 20];
+        return counts.filter(count => count <= totalGames);
+    };
+
+    const availableGameCounts = getAvailableGameCounts();
+    const validGamesCount = Math.min(Math.max(1, gamesCount), totalGames);
+
+    const recentStats = data.recent_stats || [];
+    const filteredRecentStats = recentStats.slice(0, validGamesCount);
+    const filteredBettingStats = calculateBettingStats(filteredRecentStats, data.player_type);
+
     const renderContent = () => {
         if (data.player_type === "TWP") {
-            // Two-way player
-            const hittingStats = data.betting_stats.hitting as Record<string, number>;
-            const pitchingStats = data.betting_stats.pitching as Record<string, number>;
+            const hittingStats = calculateBettingStats(filteredRecentStats, "Hitter");
+            const pitchingStats = calculateBettingStats(filteredRecentStats, "Pitcher");
             
             return (
-                <Tabs variant="enclosed" colorScheme="blue">
+                <Tabs variant="enclosed" colorScheme="blue" onChange={setActiveTab}>
                     <TabList>
                         <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Hitting</Tab>
                         <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Pitching</Tab>
@@ -274,11 +443,9 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
                 </Tabs>
             );
         } else if (data.player_type === "Pitcher") {
-            // Pitcher stats
-            return <PitcherStats stats={data.betting_stats as Record<string, number>} />;
+            return <PitcherStats stats={filteredBettingStats} />;
         } else {
-            // Default hitter stats
-            return <HitterStats stats={data.betting_stats as Record<string, number>} />;
+            return <HitterStats stats={filteredBettingStats} />;
         }
     };
 
@@ -293,27 +460,70 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
                         </Badge>
                     )}
                 </Heading>
-                <Box>
-                    <Select
-                        value={gamesCount}
-                        onChange={(e) => onGamesCountChange(Number(e.target.value))}
-                        bg="gray.700"
-                        color="red.500"
-                        maxW="200px"
-                        fontFamily={THEME.fonts.body}
-                    >
-                        {[5, 10, 15, 20, 30].map(num => (
-                            <option key={num} value={num}>Last {num} Games</option>
-                        ))}
-                    </Select>
-                </Box>
+                {availableGameCounts.length > 0 && (
+                    <Box>
+                        <Select
+                            value={validGamesCount}
+                            onChange={(e) => onGamesCountChange(Number(e.target.value))}
+                            bg="gray.700"
+                            color="red.500"
+                            maxW="200px"
+                            fontFamily={THEME.fonts.body}
+                        >
+                            {availableGameCounts.map(num => (
+                                <option key={num} value={num}>Last {num} Games</option>
+                            ))}
+                        </Select>
+                    </Box>
+                )}
             </Flex>
 
-            <Text mb={4} color="gray.400">
-                Based on {data.games_found} most recent games. Percentages show how often the player hits the betting prop.
-            </Text>
+            {totalGames > 0 ? (
+                <>
+                    <Text mb={4} color="gray.400">
+                        Based on {validGamesCount} most recent games. Percentages show how often the player hits the betting prop.
+                    </Text>
 
-            {renderContent()}
+                    <Button
+                        onClick={() => setShowGameLog(!showGameLog)}
+                        mb={4}
+                        colorScheme="blue"
+                        variant="outline"
+                    >
+                        {showGameLog ? 'Hide Game Log' : 'Show Game Log'}
+                    </Button>
+
+                    {showGameLog && recentStats.length > 0 && (
+                        <>
+                            {data.player_type === "TWP" ? (
+                                <Tabs variant="enclosed" colorScheme="blue" onChange={setActiveTab}>
+                                    <TabList>
+                                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Hitting Games</Tab>
+                                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Pitching Games</Tab>
+                                    </TabList>
+                                    <TabPanels>
+                                        <TabPanel p={0} pt={4}>
+                                            <GameLog games={filteredRecentStats} playerType="Hitter" />
+                                        </TabPanel>
+                                        <TabPanel p={0} pt={4}>
+                                            <GameLog games={filteredRecentStats} playerType="Pitcher" />
+                                        </TabPanel>
+                                    </TabPanels>
+                                </Tabs>
+                            ) : (
+                                <GameLog games={filteredRecentStats} playerType={data.player_type} />
+                            )}
+                            <Divider my={6} />
+                        </>
+                    )}
+
+                    {renderContent()}
+                </>
+            ) : (
+                <Text fontSize="lg" textAlign="center" color="gray.400">
+                    No recent games available for betting analysis
+                </Text>
+            )}
         </Box>
     );
 };
