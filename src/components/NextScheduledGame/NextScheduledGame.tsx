@@ -13,6 +13,7 @@ import axios from "axios";
 import { FaUser, FaChartLine, FaBaseballBall, FaClock } from "react-icons/fa";
 import TeamLogo from "../TeamLogo/TeamLogo";
 import { getTeamAbbreviation } from '../../constants/teams';
+import { useNavigate } from 'react-router-dom';
 
 interface Team {
   id: number;
@@ -51,6 +52,7 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
   const [gameData, setGameData] = useState<Game[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   const cardBg = useColorModeValue("gray.700", "gray.800");
   const textColor = useColorModeValue("white", "gray.200");
@@ -77,6 +79,10 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTeamClick = (teamId: number) => {
+    navigate(`/stats`, { state: { selectedTeamId: teamId } });
   };
 
   if (isLoading) {
@@ -108,7 +114,12 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
             <Flex align="center">
               <TeamLogo teamId={scheduledGame.away_team.id} size="40px" />
               <VStack align="start" ml={3}>
-                <Text fontSize="md" fontWeight="bold">
+                <Text 
+                  fontSize="md" 
+                  fontWeight="bold"
+                  _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                  onClick={() => handleTeamClick(scheduledGame.away_team.id)}
+                >
                   {getTeamAbbreviation(scheduledGame.away_team.name)}
                 </Text>
                 <Text fontSize="xs">
@@ -121,7 +132,12 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
             </Text>
             <Flex align="center">
               <VStack align="end" mr={3}>
-                <Text fontSize="md" fontWeight="bold">
+                <Text 
+                  fontSize="md" 
+                  fontWeight="bold"
+                  _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
+                  onClick={() => handleTeamClick(scheduledGame.home_team.id)}
+                >
                   {getTeamAbbreviation(scheduledGame.home_team.name)}
                 </Text>
                 <Text fontSize="xs">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Button, Flex, VStack, HStack, Divider, Alert, AlertIcon } from '@chakra-ui/react';
 import TeamDropdown from '../../components/TeamDropdown/TeamDropdown';
 import SpanDropdown from '../../components/SpanDropdown/SpanDropdown'
@@ -10,15 +10,26 @@ import { useStatistics } from '../../hooks/useStatistics';
 import { THEME } from "../../constants"
 import TeamLogo from '../../components/TeamLogo/TeamLogo';
 import NextScheduledGame from '../../components/NextScheduledGame/NextScheduledGame';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const StatsPage: React.FC = () => {
     const [selectedTeam, setSelectedTeam] = React.useState<number>(0);
-    const [selectedSpan, setSelectedSpan] = React.useState<number>(10);
+    const [selectedSpan, setSelectedSpan] = React.useState<number>(5);
     const [fetchGame, setFetchGame] = React.useState<boolean>(false);
     const [showNextGame, setShowNextGame] = React.useState<boolean>(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { fetchStats, data, isLoading, error } = useStatistics();
+
+    useEffect(() => {
+        const state = location.state as { selectedTeamId?: number };
+        if (state?.selectedTeamId) {
+            setSelectedTeam(state.selectedTeamId);
+            fetchStats(state.selectedTeamId, selectedSpan);
+            setFetchGame(true);
+            setShowNextGame(true);
+        }
+    }, [location.state]);
 
     const handleTeamChange = (teamId: number) => {
         setSelectedTeam(teamId);

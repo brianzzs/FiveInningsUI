@@ -78,11 +78,13 @@ const TeamDropdown: React.FC<TeamDropdownProps> = ({
           borderRadius="md"
           shadow="sm"
         >
-          {Object.entries(teams).map(([teamId, teamName]) => (
-            <option key={teamId} value={teamId}>
-              {teamName}
-            </option>
-          ))}
+          {Object.entries(teams)
+            .sort(([, a], [, b]) => a.localeCompare(b))
+            .map(([teamId, teamName]) => (
+              <option key={teamId} value={teamId}>
+                {teamName}
+              </option>
+            ))}
         </Select>
       </FormControl>
     </Box>
