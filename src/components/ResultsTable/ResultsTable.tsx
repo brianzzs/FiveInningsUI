@@ -14,6 +14,7 @@ import {
     Card,
     CardBody,
     CardHeader,
+    VStack,
 } from "@chakra-ui/react";
 import { getTeamAbbreviation } from '../../constants/teams';
 import TeamLogo from "../TeamLogo/TeamLogo";
@@ -72,7 +73,12 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                             p={3}
                             borderBottom="1px solid white"
                         >
-                            Game {index + 1}
+                            <VStack spacing={1}>
+                                <Text>Game {index + 1}</Text>
+                                <Text fontSize="sm" color="gray.400">
+                                    {new Date(game.game_date).toLocaleDateString()}
+                                </Text>
+                            </VStack>
                         </CardHeader>
                         <CardBody>
                             <TableContainer>

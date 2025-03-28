@@ -9,6 +9,7 @@ interface Team {
 }
 
 export interface Game {
+    game_date: string;
     away_team: Team;
     home_team: Team;
 }
