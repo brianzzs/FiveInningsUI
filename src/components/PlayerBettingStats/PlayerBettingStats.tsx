@@ -233,7 +233,7 @@ const GameLog = ({ games, playerType }: { games: Array<any>, playerType: string 
                         <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
                     </Flex>
                     <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">Runs: {game.runs_allowed}</Text>
+                        <Text fontWeight="bold">Earned Runs: {game.runs}</Text>
                     </Flex>
                     <Flex align="center" gap={2}>
                         <Text fontWeight="bold">H: {game.hits_allowed}</Text>
@@ -338,11 +338,11 @@ const calculateBettingStats = (games: Array<any>, playerType: string) => {
         stats.over_8_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 8.5).length / totalGames) * 100);
         stats.over_9_5_hits_allowed = Math.round((games.filter(g => g.hits_allowed > 9.5).length / totalGames) * 100);
 
-        stats.over_1_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 1.5).length / totalGames) * 100);
-        stats.over_2_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 2.5).length / totalGames) * 100);
-        stats.over_3_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 3.5).length / totalGames) * 100);
-        stats.over_4_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 4.5).length / totalGames) * 100);
-        stats.over_5_5_runs_allowed = Math.round((games.filter(g => g.runs_allowed > 5.5).length / totalGames) * 100);
+        stats.over_1_5_runs_allowed = Math.round((games.filter(g => g.runs > 1.5).length / totalGames) * 100);
+        stats.over_2_5_runs_allowed = Math.round((games.filter(g => g.runs > 2.5).length / totalGames) * 100);
+        stats.over_3_5_runs_allowed = Math.round((games.filter(g => g.runs > 3.5).length / totalGames) * 100);
+        stats.over_4_5_runs_allowed = Math.round((games.filter(g => g.runs > 4.5).length / totalGames) * 100);
+        stats.over_5_5_runs_allowed = Math.round((games.filter(g => g.runs > 5.5).length / totalGames) * 100);
     } else {
         // Calculate hitter stats
         const totalGames = games.length;
