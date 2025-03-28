@@ -200,19 +200,6 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
     const currentYear = new Date().getFullYear();
     const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
 
-    // Separate query for player info to get team ID even when stats are unavailable
-    const { data: playerInfo } = useQuery({
-        queryKey: ['playerInfo', playerId],
-        queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/info/${playerId}`);
-            if (response.data.error) {
-                throw new Error(response.data.error);
-            }
-            return response.data;
-        },
-        enabled: !!playerId,
-    });
-
     const { data: stats, isLoading, error } = useQuery<PlayerStats, Error>({
         queryKey: ['playerStats', playerId, season],
         queryFn: async () => {
@@ -248,13 +235,11 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
     });
 
     useEffect(() => {
-        // Set team ID from either stats or playerInfo
-        const teamName = stats?.player_info?.current_team || playerInfo?.current_team;
-        if (teamName && onTeamIdSet) {
-            const teamId = getTeamIdFromName(teamName);
+        if (stats?.player_info?.current_team && onTeamIdSet) {
+            const teamId = getTeamIdFromName(stats.player_info.current_team);
             onTeamIdSet(teamId);
         }
-    }, [stats, playerInfo, onTeamIdSet]);
+    }, [stats, onTeamIdSet]);
 
     const renderSeasonStats = () => {
         if (isLoading) {
@@ -274,6 +259,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                             : "Player doesn't have stats currently!"}
                     </Text>
                 </Box>
+                
             );
         }
 
@@ -382,17 +368,14 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
         }
     };
 
-    // Get player info from either stats or the separate playerInfo query
-    const displayPlayerInfo = stats?.player_info || playerInfo;
-
     return (
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
             <VStack spacing={6} align="stretch">
-                {displayPlayerInfo && (
+                {stats?.player_info && (
                     <Grid
                         templateColumns={{ base: "1fr", md: "auto 1fr" }}
                         gap={6}
-                        bgImage={displayPlayerInfo.images?.action || 'none'}
+                        bgImage={stats.player_info.images.action || 'none'}
                         bgSize="cover"
                         bgPosition="center 10%"
                         bgRepeat="no-repeat"
@@ -410,24 +393,24 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                     >
                         <Box position="relative" zIndex={2} pl={1}>
                             <Image
-                                src={displayPlayerInfo.images?.headshot}
-                                alt={displayPlayerInfo.full_name}
+                                src={stats.player_info.images.headshot}
+                                alt={stats.player_info.full_name}
                                 borderRadius="md"
                                 maxW="200px"
                             />
                             <VStack align="start" spacing={4}>
                                 <Heading size="lg" fontWeight="bold" lineHeight="1.2">
-                                    {displayPlayerInfo.full_name}
+                                    {stats.player_info.full_name}
                                 </Heading>
                                 <Text fontSize="sm" fontWeight="medium" color="gray.300">
-                                    Position: {displayPlayerInfo.position}
+                                    Position: {stats.player_info.position}
                                 </Text>
                                 <HStack spacing={4} flexWrap="wrap">
-                                    <Text fontWeight="bold">Age: {displayPlayerInfo.age}</Text>
-                                    <Text fontWeight="bold">Bats: {displayPlayerInfo.bat_side}</Text>
-                                    <Text fontWeight="bold">Throws: {displayPlayerInfo.throw_hand}</Text>
-                                    <Text fontWeight="bold">Team: {displayPlayerInfo.current_team}</Text>
-                                    <TeamLogo teamId={getTeamIdFromName(displayPlayerInfo.current_team)} size="35px" marginTop="auto" floatLeft={true} />
+                                    <Text fontWeight="bold">Age: {stats.player_info.age}</Text>
+                                    <Text fontWeight="bold">Bats: {stats.player_info.bat_side}</Text>
+                                    <Text fontWeight="bold">Throws: {stats.player_info.throw_hand}</Text>
+                                    <Text fontWeight="bold">Team: {stats.player_info.current_team}</Text>
+                                    <TeamLogo teamId={getTeamIdFromName(stats.player_info.current_team)} size="35px" marginTop="auto" floatLeft={true} />
                                 </HStack>
                             </VStack>
                         </Box>
