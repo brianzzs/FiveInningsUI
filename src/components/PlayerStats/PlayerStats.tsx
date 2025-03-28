@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -33,6 +33,7 @@ import { getTeamAbbreviation, getTeamIdFromName } from '../../constants/teams';
 interface PlayerStatsProps {
     playerId: number;
     season: string;
+    onTeamIdSet?: (teamId: number) => void;
 }
 
 interface RecentHittingGame {
@@ -149,7 +150,7 @@ const PitchingStats: React.FC<{
     );
 };
 
-const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
+const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet }) => {
     const [gamesCount, setGamesCount] = useState<number>(2);
     // const currentYear = new Date().getFullYear().toString();
 
@@ -169,6 +170,13 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season }) => {
         },
         enabled: season === "2024",
     });
+
+    useEffect(() => {
+        if (stats?.player_info?.current_team && onTeamIdSet) {
+            const teamId = getTeamIdFromName(stats.player_info.current_team);
+            onTeamIdSet(teamId);
+        }
+    }, [stats, onTeamIdSet]);
 
     if (isLoading || !stats) return <Spinner />;
 

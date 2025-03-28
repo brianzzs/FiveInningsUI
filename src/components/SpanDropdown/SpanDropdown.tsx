@@ -7,7 +7,7 @@ interface SpanDropdownProps {
 }
 
 const SpanDropdown: React.FC<SpanDropdownProps> = ({ onPeriodChange }) => {
-    const [selectedPeriod, setSelectedPeriod] = useState<number>(10);
+    const [selectedPeriod, setSelectedPeriod] = useState<number>(5);
 
     const handlePeriodChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const value = parseInt(event.target.value, 10);

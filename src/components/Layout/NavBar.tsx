@@ -56,7 +56,7 @@ export const NavBar: React.FC = () => (
                 }}
                 transition="all 0.2s"
             >
-                Statistics
+                Teams
             </ChakraLink>
             <ChakraLink
                 as={Link}

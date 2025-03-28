@@ -9,18 +9,34 @@ import FooterComponent from "../../components/Layout/Footer/Footer"
 import { useStatistics } from '../../hooks/useStatistics';
 import { THEME } from "../../constants"
 import TeamLogo from '../../components/TeamLogo/TeamLogo';
+import NextScheduledGame from '../../components/NextScheduledGame/NextScheduledGame';
+import { useNavigate } from 'react-router-dom';
 
 export const StatsPage: React.FC = () => {
     const [selectedTeam, setSelectedTeam] = React.useState<number>(0);
     const [selectedSpan, setSelectedSpan] = React.useState<number>(10);
+    const [fetchGame, setFetchGame] = React.useState<boolean>(false);
+    const [showNextGame, setShowNextGame] = React.useState<boolean>(false);
+    const navigate = useNavigate();
     const { fetchStats, data, isLoading, error } = useStatistics();
 
+    const handleTeamChange = (teamId: number) => {
+        setSelectedTeam(teamId);
+        setShowNextGame(false);
+        setFetchGame(false);
+    };
 
     const handleCalculate = () => {
         if (selectedTeam) {
             fetchStats(selectedTeam, selectedSpan);
-        };
+            setFetchGame(true);
+            setShowNextGame(true);
+        }
     }
+
+    const handlePitcherSelect = (playerId: number) => {
+        navigate(`/players`, { state: { selectedPlayerId: playerId } });
+    };
 
     return (
         <Flex direction="column" minHeight="100vh"  bg={THEME.colors.background}>
@@ -38,7 +54,7 @@ export const StatsPage: React.FC = () => {
                     {selectedTeam && <TeamLogo teamId={selectedTeam} size="80px" />}
 
                     <HStack spacing={4} width="100%">
-                        <TeamDropdown selectedTeam={selectedTeam} onTeamChange={setSelectedTeam} />
+                        <TeamDropdown selectedTeam={selectedTeam} onTeamChange={handleTeamChange} />
                         <SpanDropdown selectedPeriod={selectedSpan} onPeriodChange={setSelectedSpan} />
                     </HStack>
                     <Button isLoading={isLoading}
@@ -53,40 +69,44 @@ export const StatsPage: React.FC = () => {
                     </Button>
                 </VStack>
 
+                {error && (
+                    <Alert status="error" mt={6}>
+                        <AlertIcon />
+                        {error.message}
+                    </Alert>
+                )}
 
-                {error &&
-                    (
+                {showNextGame && selectedTeam && (
+                    <Box width="100%" mt={8}>
+                        <NextScheduledGame 
+                            teamId={selectedTeam} 
+                            fetchGame={fetchGame}
+                            onPitcherSelect={handlePitcherSelect}
+                        />
+                    </Box>
+                )}
 
-                        <Alert status="error" mt={6}>
-                            <AlertIcon />
-                            {error.message}
-                        </Alert>
-                    )}
-
-                {data &&
-                    (
-                        <Box width="100%" mt={8}>
-                            <StatisticsPanel data={data} />
-                            <Divider my={8} />
-                            <Box
-                                bg="gray.800"
-                                p={6}
-                                borderRadius="xl"
-                                shadow="xl"
-                                mx={[4, 8, 16]}
-                            >
-                                <ResultsTable
-                                    data={data.results}
-                                    displayedTeamId={selectedTeam}
-                                    selectedPeriod={selectedSpan}
-                                />
-                            </Box>
-
+                {data && (
+                    <Box width="100%" mt={8}>
+                        <StatisticsPanel data={data} />
+                        <Divider my={8} />
+                        <Box
+                            bg="gray.800"
+                            p={6}
+                            borderRadius="xl"
+                            shadow="xl"
+                            mx={[4, 8, 16]}
+                        >
+                            <ResultsTable
+                                data={data.results}
+                                displayedTeamId={selectedTeam}
+                                selectedPeriod={selectedSpan}
+                            />
                         </Box>
-                    )}
+                    </Box>
+                )}
             </Flex>
-            <FooterComponent isLoading={isLoading} />
-
+            <FooterComponent />
         </Flex>
     )
 }

@@ -22,6 +22,8 @@ import PlayerBettingStats from '../../components/PlayerBettingStats/PlayerBettin
 import FooterComponent from '../../components/Layout/Footer/Footer';
 import { THEME } from '../../constants';
 import { logEvent } from '../../utils/analytics';
+import NextScheduledGame from '../../components/NextScheduledGame/NextScheduledGame';
+import { getTeamIdFromName } from '../../constants/teams';
 
 const popularPlayers = [
     { id: 592450, name: "Aaron Judge", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/592450/headshot/67/current" },
@@ -50,6 +52,8 @@ const PlayerPage: React.FC = () => {
     const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
     const [selectedSeason, setSelectedSeason] = useState('2024');
     const [bettingGamesCount, setBettingGamesCount] = useState(5);
+    const [playerTeamId, setPlayerTeamId] = useState<number | null>(null);
+    const [fetchGame, setFetchGame] = useState<boolean>(false);
     const currentYear = new Date().getFullYear();
     const currentSeason = "2025";
     const seasons = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
@@ -61,12 +65,14 @@ const PlayerPage: React.FC = () => {
         if (state?.selectedPlayerId) {
             setSelectedPlayerId(state.selectedPlayerId);
             setSelectedSeason('2025');
+            setFetchGame(true);
         }
     }, [location]);
 
     const handlePlayerSelect = (playerId: number) => {
         setSelectedPlayerId(playerId);
         setSelectedSeason('2025');
+        setFetchGame(true);
         
         logEvent('player_selected', {
             player_id: playerId,
@@ -81,6 +87,12 @@ const PlayerPage: React.FC = () => {
             player_id: selectedPlayerId,
             season: season
         });
+    };
+
+    const handlePitcherSelect = (playerId: number) => {
+        setSelectedPlayerId(playerId);
+        setSelectedSeason('2025');
+        setFetchGame(true);
     };
 
     return (
@@ -151,6 +163,7 @@ const PlayerPage: React.FC = () => {
                                             <PlayerStats
                                                 playerId={selectedPlayerId}
                                                 season={selectedSeason}
+                                                onTeamIdSet={setPlayerTeamId}
                                             />
                                         </TabPanel>
                                         <TabPanel p={0} pt={4}>
@@ -166,13 +179,24 @@ const PlayerPage: React.FC = () => {
                                 <PlayerStats
                                     playerId={selectedPlayerId}
                                     season={selectedSeason}
+                                    onTeamIdSet={setPlayerTeamId}
                                 />
+                            )}
+
+                            {playerTeamId && (
+                                <Box mt={8}>
+                                    <NextScheduledGame 
+                                        teamId={playerTeamId}
+                                        fetchGame={fetchGame}
+                                        onPitcherSelect={handlePitcherSelect}
+                                    />
+                                </Box>
                             )}
                         </>
                     )}
                 </VStack>
             </Container>
-            <FooterComponent/>
+            <FooterComponent />
         </Box>
     );
 };
