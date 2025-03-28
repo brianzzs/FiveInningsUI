@@ -37,7 +37,7 @@ const TodaySchedule: React.FC = () => {
     const { data: gamesData = [], error, isLoading } = useQuery<Game[], Error>({
         queryKey: ['todaySchedule'],
         queryFn: async () => {
-            const response = await axios.get<Game[]>(`${apiUrl}/schedule_today`);
+            const response = await axios.get<Game[]>(`${apiUrl}/today_schedule`);
             return response.data;
         },
         staleTime: 1000 * 60 * 10, 

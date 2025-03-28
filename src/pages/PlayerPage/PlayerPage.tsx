@@ -44,7 +44,6 @@ const popularPlayers = [
     { id: 670541, name: "Yordan Alvarez", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/670541/headshot/67/current" },
     { id: 608070, name: "José Ramírez", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/608070/headshot/67/current" },
     { id: 683002, name: "Gunnar Henderson", image: "https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/683002/headshot/67/current" },
-
 ];
 
 const PlayerPage: React.FC = () => {
@@ -93,6 +92,17 @@ const PlayerPage: React.FC = () => {
         setSelectedPlayerId(playerId);
         setSelectedSeason('2025');
         setFetchGame(true);
+    };
+
+    const handleStatsError = () => {
+        if (selectedSeason === '2025') {
+            setSelectedSeason('2024');
+            logEvent('season_fallback', {
+                player_id: selectedPlayerId,
+                from_season: '2025',
+                to_season: '2024'
+            });
+        }
     };
 
     return (
@@ -164,6 +174,7 @@ const PlayerPage: React.FC = () => {
                                                 playerId={selectedPlayerId}
                                                 season={selectedSeason}
                                                 onTeamIdSet={setPlayerTeamId}
+                                                onError={handleStatsError}
                                             />
                                         </TabPanel>
                                         <TabPanel p={0} pt={4}>
@@ -180,11 +191,16 @@ const PlayerPage: React.FC = () => {
                                     playerId={selectedPlayerId}
                                     season={selectedSeason}
                                     onTeamIdSet={setPlayerTeamId}
+                                    onError={handleStatsError}
                                 />
                             )}
 
                             {playerTeamId && (
+                                
                                 <Box mt={8}>
+                                    <Text fontSize="2xl" fontWeight="bold" color="white" mb={4} textAlign="center">
+                                        Next Scheduled Game
+                                    </Text>
                                     <NextScheduledGame 
                                         teamId={playerTeamId}
                                         fetchGame={fetchGame}

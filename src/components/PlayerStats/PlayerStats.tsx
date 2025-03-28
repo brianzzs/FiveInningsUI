@@ -34,6 +34,7 @@ interface PlayerStatsProps {
     playerId: number;
     season: string;
     onTeamIdSet?: (teamId: number) => void;
+    onError?: () => void;
 }
 
 interface RecentHittingGame {
@@ -150,16 +151,26 @@ const PitchingStats: React.FC<{
     );
 };
 
-const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet }) => {
+const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet, onError }) => {
     const [gamesCount, setGamesCount] = useState<number>(2);
-    // const currentYear = new Date().getFullYear().toString();
 
-    const { data: stats, isLoading } = useQuery({
+    const { data: stats, isLoading, error } = useQuery<PlayerStats, Error>({
         queryKey: ['playerStats', playerId, season],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/stats/${playerId}/${season}`);
-            return response.data as PlayerStats;
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/stats/${playerId}/${season}`);
+                if (response.data.error || !response.data || Object.keys(response.data).length === 0) {
+                    throw new Error('No data available');
+                }
+                return response.data as PlayerStats;
+            } catch (error) {
+                if (season === '2025' && onError) {
+                    onError();
+                }
+                throw error;
+            }
         },
+        retry: false
     });
 
     const { data: recentStats, isLoading: isLoadingRecent } = useQuery({
