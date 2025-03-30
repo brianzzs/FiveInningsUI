@@ -20,7 +20,7 @@ export const useStatistics = (): UseStatisticsResult => {
         setError(null);
         const apiUrl = import.meta.env.VITE_API_URL
         try {
-            const response = await axios.get<StatisticsData>(`${apiUrl}/stats/${teamId}/${period}`);
+            const response = await axios.get<StatisticsData>(`${apiUrl}/team-stats/${teamId}/${period}`);
 
             setData(response.data);
         } catch (error) {
