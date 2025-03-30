@@ -412,16 +412,17 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
 
     const totalGames = data.games_found || 0;
     
-    const getAvailableGameCounts = () => {
-        const counts = [1, 5, 7, 10, 15, 20];
-        return counts.filter(count => count <= totalGames);
-    };
+    // Generate options dynamically from 1 up to totalGames
+    const availableGameCounts = totalGames > 0 ? Array.from({ length: totalGames }, (_, i) => i + 1) : [];
 
-    const availableGameCounts = getAvailableGameCounts();
-    const validGamesCount = Math.min(Math.max(1, gamesCount), totalGames);
+    // Ensure gamesCount from props is within bounds [1, totalGames]
+    const clampedGamesCount = Math.max(1, gamesCount);
+    const validGamesCount = totalGames > 0 ? Math.min(clampedGamesCount, totalGames) : 0;
 
     const recentStats = data.recent_stats || [];
+    // Slice recent stats based on the valid count
     const filteredRecentStats = recentStats.slice(0, validGamesCount);
+    // Calculate stats based on the sliced games
     const filteredBettingStats = calculateBettingStats(filteredRecentStats, data.player_type);
 
     const renderContent = () => {
@@ -472,6 +473,7 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
                             color="red.500"
                             maxW="200px"
                             fontFamily={THEME.fonts.body}
+                            disabled={totalGames === 0}
                         >
                             {availableGameCounts.map(num => (
                                 <option key={num} value={num}>Last {num} Games</option>

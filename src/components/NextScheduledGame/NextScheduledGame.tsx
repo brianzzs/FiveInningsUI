@@ -15,6 +15,8 @@ import TeamLogo from "../TeamLogo/TeamLogo";
 import { getTeamAbbreviation } from '../../constants/teams';
 import { useNavigate } from 'react-router-dom';
 
+// Remove or comment out the old Team interface
+/*
 interface Team {
   id: number;
   name: string;
@@ -29,11 +31,30 @@ interface Team {
     id: number;
   };
 }
+*/
 
+// Update the Game interface to match the new flat structure
 interface Game {
-  game_datetime: string;
-  away_team: Team;
-  home_team: Team;
+    awayPitcher: string;
+    awayPitcherERA: string | number;
+    awayPitcherHand: string;
+    awayPitcherID: number;
+    awayPitcherLosses: string | number;
+    awayPitcherWins: string | number;
+    away_team_id: number;
+    away_team_name: string;
+    game_id: number;
+    game_datetime: string; // Assuming this maps from game_time_utc or game_time_local
+    homePitcher: string;
+    homePitcherERA: string | number;
+    homePitcherHand: string;
+    homePitcherID: number;
+    homePitcherLosses: string | number;
+    homePitcherWins: string | number;
+    home_team_id: number;
+    home_team_name: string;
+    status: string;
+    venue: string;
 }
 
 interface NextScheduledGameProps {
@@ -112,19 +133,22 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
             direction={{ base: "column", sm: "row" }}
             mb={3}>
             <Flex align="center">
-              <TeamLogo teamId={scheduledGame.away_team.id} size="40px" />
+              <TeamLogo teamId={scheduledGame.away_team_id} size="40px" />
               <VStack align="start" ml={3}>
                 <Text 
                   fontSize="md" 
                   fontWeight="bold"
                   _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                  onClick={() => handleTeamClick(scheduledGame.away_team.id)}
+                  onClick={() => handleTeamClick(scheduledGame.away_team_id)}
                 >
-                  {getTeamAbbreviation(scheduledGame.away_team.name)}
+                  {getTeamAbbreviation(scheduledGame.away_team_name)}
                 </Text>
+                {/* Remove Team Wins/Losses display if not available */}
+                {/* 
                 <Text fontSize="xs">
                   ({scheduledGame.away_team.wins}-{scheduledGame.away_team.losses})
                 </Text>
+                */}
               </VStack>
             </Flex>
             <Text fontSize="xl" mx={3}>
@@ -136,15 +160,18 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
                   fontSize="md" 
                   fontWeight="bold"
                   _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                  onClick={() => handleTeamClick(scheduledGame.home_team.id)}
+                  onClick={() => handleTeamClick(scheduledGame.home_team_id)}
                 >
-                  {getTeamAbbreviation(scheduledGame.home_team.name)}
+                  {getTeamAbbreviation(scheduledGame.home_team_name)}
                 </Text>
+                {/* Remove Team Wins/Losses display if not available */}
+                {/* 
                 <Text fontSize="xs">
                   ({scheduledGame.home_team.wins}-{scheduledGame.home_team.losses})
                 </Text>
+                 */}
               </VStack>
-              <TeamLogo teamId={scheduledGame.home_team.id} size="40px" />
+              <TeamLogo teamId={scheduledGame.home_team_id} size="40px" />
             </Flex>
           </Flex>
 
@@ -157,19 +184,19 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
                     <Text 
                       fontSize="sm"
                       _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                      onClick={() => onPitcherSelect(scheduledGame.away_team.probable_pitcher.id)}
+                      onClick={() => onPitcherSelect(scheduledGame.awayPitcherID)}
                     >
-                      {scheduledGame.away_team.probable_pitcher.name} ({scheduledGame.away_team.probable_pitcher.hand})
+                      {scheduledGame.awayPitcher} ({scheduledGame.awayPitcherHand})
                     </Text>
                   ),
                 },
                 {
                   icon: FaChartLine,
-                  label: `W-L: ${scheduledGame.away_team.probable_pitcher.wins}-${scheduledGame.away_team.probable_pitcher.losses}`,
+                  label: `W-L: ${String(scheduledGame.awayPitcherWins)}-${String(scheduledGame.awayPitcherLosses)}`,
                 },
                 {
                   icon: FaBaseballBall,
-                  label: `ERA: ${scheduledGame.away_team.probable_pitcher.era}`,
+                  label: `ERA: ${String(scheduledGame.awayPitcherERA)}`,
                 },
               ].map((item, index) => (
                 <VStack key={index} align="center" w="30%">
@@ -191,19 +218,19 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
                     <Text 
                       fontSize="sm"
                       _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                      onClick={() => onPitcherSelect(scheduledGame.home_team.probable_pitcher.id)}
+                      onClick={() => onPitcherSelect(scheduledGame.homePitcherID)}
                     >
-                      {scheduledGame.home_team.probable_pitcher.name} ({scheduledGame.home_team.probable_pitcher.hand})
+                      {scheduledGame.homePitcher} ({scheduledGame.homePitcherHand})
                     </Text>
                   ),
                 },
                 {
                   icon: FaChartLine,
-                  label: `W-L: ${scheduledGame.home_team.probable_pitcher.wins}-${scheduledGame.home_team.probable_pitcher.losses}`,
+                  label: `W-L: ${String(scheduledGame.homePitcherWins)}-${String(scheduledGame.homePitcherLosses)}`,
                 },
                 {
                   icon: FaBaseballBall,
-                  label: `ERA: ${scheduledGame.home_team.probable_pitcher.era}`,
+                  label: `ERA: ${String(scheduledGame.homePitcherERA)}`,
                 },
               ].map((item, index) => (
                 <VStack key={index} align="center" w="30%">

@@ -22,25 +22,28 @@ import { MdPerson, MdAccessTime, MdOutlineReceiptLong, MdSportsBaseball, MdHands
 import TeamLogo from "../TeamLogo/TeamLogo";
 import { getTeamAbbreviation } from '../../constants/teams';
 
-interface Team {
-    id: number;
-    name: string;
-    wins: number;
-    losses: number;
-    probable_pitcher: {
-        name: string;
-        hand: string;
-        wins: number;
-        losses: number;
-        era: number;
-        id: number;
-    };
-}
-
+// Define the new Game interface matching the API response
 interface Game {
-    game_datetime: string;
-    away_team: Team;
-    home_team: Team;
+    awayPitcher: string;
+    awayPitcherERA: string | number;
+    awayPitcherHand: string;
+    awayPitcherID: number;
+    awayPitcherLosses: string | number;
+    awayPitcherWins: string | number;
+    away_team_id: number;
+    away_team_name: string;
+    game_id: number;
+    game_datetime: string; // Assuming this maps from game_time_utc or game_time_local
+    homePitcher: string;
+    homePitcherERA: string | number;
+    homePitcherHand: string;
+    homePitcherID: number;
+    homePitcherLosses: string | number;
+    homePitcherWins: string | number;
+    home_team_id: number;
+    home_team_name: string;
+    status: string;
+    venue: string;
 }
 
 interface TodayScheduleProps {
@@ -86,31 +89,29 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                     <CardBody p={4} overflowX={"auto"}>
                         <Flex justify="space-between" align="center" mb={6}>
                             <HStack spacing={3}>
-                                <TeamLogo teamId={game.away_team.id} size="50px" />
+                                <TeamLogo teamId={game.away_team_id} size="50px" />
                                 <VStack align="start" spacing={0}>
-                                    <Text 
+                                    <Text
                                         fontWeight="bold"
                                         _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                                        onClick={() => handleTeamClick(game.away_team.id)}
+                                        onClick={() => handleTeamClick(game.away_team_id)}
                                     >
-                                        {getTeamAbbreviation(game.away_team.name)}
+                                        {getTeamAbbreviation(game.away_team_name)}
                                     </Text>
-                                    <Text fontSize="sm">({game.away_team.wins}-{game.away_team.losses})</Text>
                                 </VStack>
                             </HStack>
                             <Text fontSize="xl" fontWeight="bold">@</Text>
                             <HStack spacing={3}>
                                 <VStack align="end" spacing={0}>
-                                    <Text 
+                                    <Text
                                         fontWeight="bold"
                                         _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                                        onClick={() => handleTeamClick(game.home_team.id)}
+                                        onClick={() => handleTeamClick(game.home_team_id)}
                                     >
-                                        {getTeamAbbreviation(game.home_team.name)}
+                                        {getTeamAbbreviation(game.home_team_name)}
                                     </Text>
-                                    <Text fontSize="sm">({game.home_team.wins}-{game.home_team.losses})</Text>
                                 </VStack>
-                                <TeamLogo teamId={game.home_team.id} size="50px" />
+                                <TeamLogo teamId={game.home_team_id} size="50px" />
                             </HStack>
                         </Flex>
 
@@ -128,31 +129,31 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                                     <Td>
                                         <HStack>
                                             <MdPerson />
-                                            <Text 
+                                            <Text
                                                 _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                                                onClick={() => onPitcherSelect(game.away_team.probable_pitcher.id)}
+                                                onClick={() => onPitcherSelect(game.awayPitcherID)}
                                             >
-                                                {game.away_team.probable_pitcher.name}
+                                                {game.awayPitcher}
                                             </Text>
-                                            <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.away_team.name)})</Text>
+                                            <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.away_team_name)})</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack justify="flex-end">
                                             <MdSportsBaseball />
-                                            <Text>{game.away_team.probable_pitcher.era}</Text>
+                                            <Text>{String(game.awayPitcherERA)}</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack justify="flex-end">
                                             <MdOutlineReceiptLong />
-                                            <Text>{game.away_team.probable_pitcher.wins}-{game.away_team.probable_pitcher.losses}</Text>
+                                            <Text>{String(game.awayPitcherWins)}-{String(game.awayPitcherLosses)}</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack>
                                             <MdHandshake style={{ float: "left" }} />
-                                            <Text>{game.away_team.probable_pitcher.hand}</Text>
+                                            <Text>{game.awayPitcherHand}</Text>
                                         </HStack>
                                     </Td>
                                 </Tr>
@@ -160,31 +161,31 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                                     <Td>
                                         <HStack>
                                             <MdPerson />
-                                            <Text 
+                                            <Text
                                                 _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                                                onClick={() => onPitcherSelect(game.home_team.probable_pitcher.id)}
+                                                onClick={() => onPitcherSelect(game.homePitcherID)}
                                             >
-                                                {game.home_team.probable_pitcher.name}
+                                                {game.homePitcher}
                                             </Text>
-                                            <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.home_team.name)})</Text>
+                                            <Text fontSize={"xs"} color={"gray.400"}>({getTeamAbbreviation(game.home_team_name)})</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack justify="flex-end">
                                             <MdSportsBaseball />
-                                            <Text>{game.home_team.probable_pitcher.era}</Text>
+                                            <Text>{String(game.homePitcherERA)}</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack justify="flex-end">
                                             <MdOutlineReceiptLong />
-                                            <Text>{game.home_team.probable_pitcher.wins}-{game.home_team.probable_pitcher.losses}</Text>
+                                            <Text>{String(game.homePitcherWins)}-{String(game.homePitcherLosses)}</Text>
                                         </HStack>
                                     </Td>
                                     <Td isNumeric>
                                         <HStack>
                                             <MdHandshake style={{ float: "left" }} />
-                                            <Text>{game.home_team.probable_pitcher.hand}</Text>
+                                            <Text>{game.homePitcherHand}</Text>
                                         </HStack>
                                     </Td>
                                 </Tr>

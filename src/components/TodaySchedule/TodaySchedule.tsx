@@ -25,9 +25,26 @@ interface Team {
 }
 
 interface Game {
+    awayPitcher: string;
+    awayPitcherERA: string | number;
+    awayPitcherHand: string;
+    awayPitcherID: number;
+    awayPitcherLosses: string | number;
+    awayPitcherWins: string | number;
+    away_team_id: number;
+    away_team_name: string;
+    game_id: number;
     game_datetime: string;
-    away_team: Team;
-    home_team: Team;
+    homePitcher: string;
+    homePitcherERA: string | number;
+    homePitcherHand: string;
+    homePitcherID: number;
+    homePitcherLosses: string | number;
+    homePitcherWins: string | number;
+    home_team_id: number;
+    home_team_name: string;
+    status: string;
+    venue: string;
 }
 
 const TodaySchedule: React.FC = () => {
