@@ -33,7 +33,6 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
     displayedTeamId,
     selectedPeriod,
 }) => {
-    const reversedData = [...data].reverse();
     const isDataAvailable = data && data.length > 0;
 
     return (
@@ -62,7 +61,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({
                 }}
                 gap={6}
             >
-                {reversedData.map((game, index) => (
+                {data.map((game, index) => (
                     <Card key={index} bg="gray.800" color="white" borderRadius="md" boxShadow="md">
                         <CardHeader
                             fontSize="lg"

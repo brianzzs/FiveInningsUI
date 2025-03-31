@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
+  Button,
   Flex,
   Grid,
   GridItem,
@@ -8,12 +9,17 @@ import {
   VStack,
   Icon,
   useColorModeValue,
+  Spinner,
+  HStack,
+  Divider,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { FaUser, FaChartLine, FaBaseballBall, FaClock } from "react-icons/fa";
+import { MdCompareArrows } from "react-icons/md";
 import TeamLogo from "../TeamLogo/TeamLogo";
 import { getTeamAbbreviation } from '../../constants/teams';
 import { useNavigate } from 'react-router-dom';
+import { THEME } from "../../constants";
 
 // Remove or comment out the old Team interface
 /*
@@ -43,6 +49,7 @@ interface Game {
     awayPitcherWins: string | number;
     away_team_id: number;
     away_team_name: string;
+    away_team_record: string;
     game_id: number;
     game_datetime: string; // Assuming this maps from game_time_utc or game_time_local
     homePitcher: string;
@@ -53,6 +60,7 @@ interface Game {
     homePitcherWins: string | number;
     home_team_id: number;
     home_team_name: string;
+    home_team_record: string;
     status: string;
     venue: string;
 }
@@ -71,12 +79,12 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
   onPitcherSelect 
 }) => {
   const [gameData, setGameData] = useState<Game[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const cardBg = useColorModeValue("gray.700", "gray.800");
-  const textColor = useColorModeValue("white", "gray.200");
+  const textColor = useColorModeValue("white", "gray.100");
 
   useEffect(() => {
     if (fetchGame && teamId) {
@@ -87,6 +95,7 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
   const fetchScheduledGame = async () => {
     setIsLoading(true);
     setError(null);
+    setGameData(null);
 
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/next_schedule/${teamId}`);
@@ -94,165 +103,170 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
       if (onFetchComplete) {
         onFetchComplete();
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Failed to fetch scheduled game.");
+    } catch (err) {
+      console.error("Error fetching scheduled game:", err);
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+         setError(`No scheduled game found for team ID ${teamId}.`);
+      } else {
+         setError("Failed to fetch the next scheduled game.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleTeamClick = (teamId: number) => {
-    navigate(`/stats`, { state: { selectedTeamId: teamId } });
+  const handleTeamClick = (id: number) => {
+    navigate(`/stats`, { state: { selectedTeamId: id } });
+  };
+
+  const handleComparisonClick = (gameId: number) => {
+    navigate(`/comparison/${gameId}`);
   };
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return (
+        <Flex justify="center" align="center" p={5}>
+            <Spinner size="lg" color={THEME.colors.accent} />
+            <Text ml={3} color="gray.300">Loading Next Game...</Text>
+        </Flex>
+    );
   }
 
   if (error) {
-    return <Text color="red.500">{error}</Text>;
+    return (
+      <Flex justify="center" p={5} bg="red.900" borderRadius="md">
+        <Text color="red.100">{error}</Text>
+      </Flex>
+    );
   }
 
-  if (gameData && gameData.length > 0) {
-    const scheduledGame = gameData[0];
-    const gameDate = new Date(scheduledGame.game_datetime);
-    const formattedDate = `${gameDate.toLocaleDateString()} ${gameDate.toLocaleTimeString()}`;
+  if (!gameData || gameData.length === 0) {
+     return fetchGame ? (
+      <Flex justify="center" p={5} bg="yellow.900" borderRadius="md">
+        <Text color="yellow.100">No upcoming scheduled game found for this team.</Text>
+      </Flex>
+     ) : null;
+  }
 
-    return (
-      <Box maxW="800px" mx="auto">
-        <Box
-          bg={cardBg}
-          p={4}
-          borderRadius="md"
-          boxShadow="lg"
-          color={textColor}>
+  const scheduledGame = gameData[0];
+  const gameDate = new Date(scheduledGame.game_datetime);
+  const formattedDate = gameDate.toLocaleString();
+
+  return (
+      <Box 
+        bg={cardBg} 
+        p={5} 
+        borderRadius="lg" 
+        boxShadow="lg" 
+        color={textColor}
+       > 
+        <VStack spacing={4} align="stretch">
           <Flex
             justify="space-between"
             align="center"
             direction={{ base: "column", sm: "row" }}
-            mb={3}>
-            <Flex align="center">
+            gap={4}
+          >
+            <HStack 
+              spacing={3} 
+              cursor="pointer" 
+              onClick={() => handleTeamClick(scheduledGame.away_team_id)}
+              _hover={{ opacity: 0.8 }}
+            >
               <TeamLogo teamId={scheduledGame.away_team_id} size="40px" />
-              <VStack align="start" ml={3}>
-                <Text 
-                  fontSize="md" 
-                  fontWeight="bold"
-                  _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                  onClick={() => handleTeamClick(scheduledGame.away_team_id)}
-                >
-                  {getTeamAbbreviation(scheduledGame.away_team_name)}
-                </Text>
-                {/* Remove Team Wins/Losses display if not available */}
-                {/* 
-                <Text fontSize="xs">
-                  ({scheduledGame.away_team.wins}-{scheduledGame.away_team.losses})
-                </Text>
-                */}
+              <VStack align="start" spacing={0}>
+                 <Text fontSize="lg" fontWeight="bold">
+                     {getTeamAbbreviation(scheduledGame.away_team_name)}
+                 </Text>
+                  <Text fontSize="xs" color="gray.400">({scheduledGame.away_team_record})</Text>
               </VStack>
-            </Flex>
-            <Text fontSize="xl" mx={3}>
-              @
-            </Text>
-            <Flex align="center">
-              <VStack align="end" mr={3}>
-                <Text 
-                  fontSize="md" 
-                  fontWeight="bold"
-                  _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                  onClick={() => handleTeamClick(scheduledGame.home_team_id)}
-                >
-                  {getTeamAbbreviation(scheduledGame.home_team_name)}
-                </Text>
-                {/* Remove Team Wins/Losses display if not available */}
-                {/* 
-                <Text fontSize="xs">
-                  ({scheduledGame.home_team.wins}-{scheduledGame.home_team.losses})
-                </Text>
-                 */}
-              </VStack>
+            </HStack>
+            
+            <Text fontSize="xl" fontWeight="bold" color="gray.400">@</Text>
+            
+            <HStack 
+              spacing={3} 
+              cursor="pointer" 
+              onClick={() => handleTeamClick(scheduledGame.home_team_id)}
+               _hover={{ opacity: 0.8 }}
+            >
+              <VStack align="end" spacing={0}>
+                  <Text fontSize="lg" fontWeight="bold">
+                      {getTeamAbbreviation(scheduledGame.home_team_name)}
+                  </Text>
+                   <Text fontSize="xs" color="gray.400">({scheduledGame.home_team_record})</Text>
+               </VStack>
               <TeamLogo teamId={scheduledGame.home_team_id} size="40px" />
-            </Flex>
+            </HStack>
           </Flex>
 
-          <Flex justify="space-between" wrap="wrap" mb={3}>
-            <Flex flex="1" justify="space-between" align="center">
-              {[
-                {
-                  icon: FaUser,
-                  label: (
-                    <Text 
-                      fontSize="sm"
-                      _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                      onClick={() => onPitcherSelect(scheduledGame.awayPitcherID)}
-                    >
-                      {scheduledGame.awayPitcher} ({scheduledGame.awayPitcherHand})
-                    </Text>
-                  ),
-                },
-                {
-                  icon: FaChartLine,
-                  label: `W-L: ${String(scheduledGame.awayPitcherWins)}-${String(scheduledGame.awayPitcherLosses)}`,
-                },
-                {
-                  icon: FaBaseballBall,
-                  label: `ERA: ${String(scheduledGame.awayPitcherERA)}`,
-                },
-              ].map((item, index) => (
-                <VStack key={index} align="center" w="30%">
-                  <Icon as={item.icon} boxSize={5} />
-                  {typeof item.label === 'string' ? <Text fontSize="xs">{item.label}</Text> : item.label}
-                </VStack>
-              ))}
-            </Flex>
+          <Flex 
+            justify="space-between" 
+            align={{ base: "stretch", md: "center" }}
+            direction={{ base: "column", md: "row" }} 
+            gap={4}
+           >
+             <VStack align={{ base: "center", md: "start" }} spacing={1} flex={1}>
+              <HStack 
+                  cursor="pointer"
+                  _hover={{ color: THEME.colors.accent }}
+                  onClick={() => onPitcherSelect(scheduledGame.awayPitcherID)}
+              >
+                  <Icon as={FaUser} color="gray.400" />
+                  <Text fontSize="sm" fontWeight="medium">{scheduledGame.awayPitcher} ({scheduledGame.awayPitcherHand})</Text>
+              </HStack>
+              <HStack>
+                  <Icon as={FaChartLine} color="gray.400" />
+                  <Text fontSize="xs">W-L: {String(scheduledGame.awayPitcherWins)}-{String(scheduledGame.awayPitcherLosses)}</Text>
+              </HStack>
+              <HStack>
+                   <Icon as={FaBaseballBall} color="gray.400" />
+                   <Text fontSize="xs">ERA: {String(scheduledGame.awayPitcherERA)}</Text>
+              </HStack>
+            </VStack>
 
-            <Text fontSize="md" mx={3} alignSelf="center" flexShrink={0}>
-              VS
-            </Text>
+            <Text fontSize="md" fontWeight="bold" color="gray.500" alignSelf="center" px={2}>VS</Text>
 
-            <Flex flex="1" justify="space-between" align="center">
-              {[
-                {
-                  icon: FaUser,
-                  label: (
-                    <Text 
-                      fontSize="sm"
-                      _hover={{ color: "#00ce81", textDecoration: "underline", cursor: "pointer" }}
-                      onClick={() => onPitcherSelect(scheduledGame.homePitcherID)}
-                    >
-                      {scheduledGame.homePitcher} ({scheduledGame.homePitcherHand})
-                    </Text>
-                  ),
-                },
-                {
-                  icon: FaChartLine,
-                  label: `W-L: ${String(scheduledGame.homePitcherWins)}-${String(scheduledGame.homePitcherLosses)}`,
-                },
-                {
-                  icon: FaBaseballBall,
-                  label: `ERA: ${String(scheduledGame.homePitcherERA)}`,
-                },
-              ].map((item, index) => (
-                <VStack key={index} align="center" w="30%">
-                  <Icon as={item.icon} boxSize={5} />
-                  {typeof item.label === 'string' ? <Text fontSize="xs">{item.label}</Text> : item.label}
-                </VStack>
-              ))}
-            </Flex>
+             <VStack align={{ base: "center", md: "end" }} spacing={1} flex={1}>
+              <HStack 
+                  cursor="pointer"
+                  _hover={{ color: THEME.colors.accent }}
+                  onClick={() => onPitcherSelect(scheduledGame.homePitcherID)}
+               >
+                  <Text fontSize="sm" fontWeight="medium">{scheduledGame.homePitcher} ({scheduledGame.homePitcherHand})</Text>
+                  <Icon as={FaUser} color="gray.400" />
+              </HStack>
+              <HStack>
+                  <Text fontSize="xs">W-L: {String(scheduledGame.homePitcherWins)}-{String(scheduledGame.homePitcherLosses)}</Text>
+                   <Icon as={FaChartLine} color="gray.400" />
+              </HStack>
+               <HStack>
+                   <Text fontSize="xs">ERA: {String(scheduledGame.homePitcherERA)}</Text>
+                    <Icon as={FaBaseballBall} color="gray.400" />
+              </HStack>
+            </VStack>
           </Flex>
 
-          <Flex justify="center">
-            <Text fontSize="xs">
-              <Icon as={FaClock} mr={2} />
-              {formattedDate}
-            </Text>
+          <Divider borderColor="gray.600" />
+
+          <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
+              <HStack spacing={1.5} fontSize="sm" color="gray.300">
+                 <Icon as={FaClock} />
+                 <Text>{formattedDate}</Text>
+              </HStack>
+              <Button 
+                size="sm"
+                colorScheme="blue"
+                variant="outline"
+                leftIcon={<Icon as={MdCompareArrows} />}
+                onClick={() => handleComparisonClick(scheduledGame.game_id)}
+              >
+                Game Comparison
+              </Button>
           </Flex>
-        </Box>
+        </VStack>
       </Box>
-    );
-  }
-
-  return null;
+  );
 };
 
 export default NextScheduledGame;

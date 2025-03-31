@@ -16,9 +16,10 @@ import {
     Card,
     CardHeader,
     CardBody,
+    Icon,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { MdPerson, MdAccessTime, MdOutlineReceiptLong, MdSportsBaseball, MdHandshake } from "react-icons/md";
+import { MdPerson, MdAccessTime, MdOutlineReceiptLong, MdSportsBaseball, MdHandshake, MdCompareArrows } from "react-icons/md";
 import TeamLogo from "../TeamLogo/TeamLogo";
 import { getTeamAbbreviation } from '../../constants/teams';
 
@@ -32,6 +33,7 @@ interface Game {
     awayPitcherWins: string | number;
     away_team_id: number;
     away_team_name: string;
+    away_team_record: string;
     game_id: number;
     game_datetime: string; // Assuming this maps from game_time_utc or game_time_local
     homePitcher: string;
@@ -42,6 +44,7 @@ interface Game {
     homePitcherWins: string | number;
     home_team_id: number;
     home_team_name: string;
+    home_team_record: string;
     status: string;
     venue: string;
 }
@@ -56,6 +59,10 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
 
     const handleTeamClick = (teamId: number) => {
         navigate(`/stats`, { state: { selectedTeamId: teamId } });
+    };
+
+    const handleComparisonClick = (gameId: number) => {
+        navigate(`/comparison/${gameId}`);
     };
 
     if (GamesData.length === 0) {
@@ -98,6 +105,7 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                                     >
                                         {getTeamAbbreviation(game.away_team_name)}
                                     </Text>
+                                    <Text fontSize="xs" color="gray.400">({game.away_team_record})</Text>
                                 </VStack>
                             </HStack>
                             <Text fontSize="xl" fontWeight="bold">@</Text>
@@ -110,6 +118,7 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                                     >
                                         {getTeamAbbreviation(game.home_team_name)}
                                     </Text>
+                                    <Text fontSize="xs" color="gray.400">({game.home_team_record})</Text>
                                 </VStack>
                                 <TeamLogo teamId={game.home_team_id} size="50px" />
                             </HStack>
@@ -191,6 +200,17 @@ const ScheduleCard = ({ GamesData, onPitcherSelect }: TodayScheduleProps) => {
                                 </Tr>
                             </Tbody>
                         </Table>
+                        <Flex justify="center" mt={4}>
+                             <Button 
+                                size="sm"
+                                colorScheme="blue"
+                                variant="outline"
+                                leftIcon={<Icon as={MdCompareArrows} />}
+                                onClick={() => handleComparisonClick(game.game_id)}
+                            >
+                                Game Comparison
+                            </Button>
+                        </Flex>
                     </CardBody>
                 </Card>
             ))}

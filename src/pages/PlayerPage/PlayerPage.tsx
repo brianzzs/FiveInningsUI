@@ -61,19 +61,21 @@ const PlayerPage: React.FC = () => {
         const state = location.state as { selectedPlayerId?: number } | null;
         if (state?.selectedPlayerId) {
             setSelectedPlayerId(state.selectedPlayerId);
-            setSelectedSeason('2025');
+            setSelectedSeason(currentSeason);
             setFetchGame(true);
         }
-    }, [location]);
+    }, [location, currentSeason]);
 
     const handlePlayerSelect = (playerId: number) => {
         setSelectedPlayerId(playerId);
-        setSelectedSeason('2025');
+        setSelectedSeason(currentSeason);
+        setBettingGamesCount(5);
+        setPlayerTeamId(null);
         setFetchGame(true);
 
         logEvent('player_selected', {
             player_id: playerId,
-            season: '2025'
+            season: currentSeason
         });
     };
 
@@ -87,28 +89,32 @@ const PlayerPage: React.FC = () => {
     };
 
     const handlePitcherSelect = (playerId: number) => {
-        setSelectedPlayerId(playerId);
-        setSelectedSeason('2025');
-        setFetchGame(true);
+        handlePlayerSelect(playerId);
     };
 
     const handleStatsError = () => {
-        if (selectedSeason === '2025') {
-            setSelectedSeason('2024');
+        if (selectedSeason === currentSeason) {
+            const fallbackSeason = (currentYear - 1).toString();
+            setSelectedSeason(fallbackSeason);
             logEvent('season_fallback', {
                 player_id: selectedPlayerId,
-                from_season: '2025',
-                to_season: '2024'
+                from_season: currentSeason,
+                to_season: fallbackSeason
             });
         }
     };
 
     return (
-        <Box minHeight="100vh" bg="gray.900">
+        <Box 
+            minHeight="100vh" 
+            bg="gray.900"
+        >
             <NavBar />
-            <Container maxW="container.xl" pt="6rem" pb="4rem">
+            <Container maxW="container.xl" pt="6rem" pb="4rem" flexGrow={1} px={{ base: 4, md: 6 }}>
                 <VStack spacing={8} align="stretch">
-                    <PlayerSearch onPlayerSelect={setSelectedPlayerId} />
+                    <Flex justify="center">
+                        <PlayerSearch onPlayerSelect={handlePlayerSelect} />
+                    </Flex>
 
                     {!selectedPlayerId && (
                         <Box>
@@ -142,34 +148,42 @@ const PlayerPage: React.FC = () => {
 
                     {selectedPlayerId && (
                         <>
-                            <Tabs variant="enclosed" colorScheme="red">
-                                <TabList>
-                                    <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Player Stats</Tab>
-                                    <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Betting Analysis</Tab>
-                                </TabList>
-                                <TabPanels>
-                                    <TabPanel p={0} pt={4}>
-                                        <PlayerStats
-                                            playerId={selectedPlayerId}
-                                            season={selectedSeason}
-                                            onTeamIdSet={setPlayerTeamId}
-                                            onError={handleStatsError}
-                                            onSeasonChange={handleSeasonChange}
-                                        />
-                                    </TabPanel>
-                                    <TabPanel p={0} pt={4}>
-                                        <PlayerBettingStats
-                                            playerId={selectedPlayerId}
-                                            gamesCount={bettingGamesCount}
-                                            onGamesCountChange={setBettingGamesCount}
-                                        />
-                                    </TabPanel>
-                                </TabPanels>
-                            </Tabs>
+                            <Box bg="gray.800" borderRadius="xl" p={4} shadow="lg">
+                                <Tabs variant="enclosed" colorScheme="red">
+                                    <TabList>
+                                        <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Player Stats</Tab>
+                                        <Tab color="green.500" _selected={{ color: 'white', bg: 'gray.700' }}>Betting Analysis</Tab>
+                                    </TabList>
+                                    <TabPanels>
+                                        <TabPanel p={0} pt={4}>
+                                            <PlayerStats
+                                                playerId={selectedPlayerId}
+                                                season={selectedSeason}
+                                                onTeamIdSet={setPlayerTeamId}
+                                                onError={handleStatsError}
+                                                onSeasonChange={handleSeasonChange}
+                                            />
+                                        </TabPanel>
+                                        <TabPanel p={0} pt={4}>
+                                            <PlayerBettingStats
+                                                playerId={selectedPlayerId}
+                                                gamesCount={bettingGamesCount}
+                                                onGamesCountChange={setBettingGamesCount}
+                                            />
+                                        </TabPanel>
+                                    </TabPanels>
+                                </Tabs>
+                            </Box>
 
                             {playerTeamId && (
-                                <Box mt={8}>
-                                    <Text fontSize="2xl" fontWeight="bold" color="white" mb={4} textAlign="center">
+                                <Box 
+                                    mt={4}
+                                    bg="gray.800"
+                                    p={5}
+                                    borderRadius="xl"
+                                    shadow="lg"
+                                >
+                                    <Text fontSize="xl" fontWeight="bold" color="white" mb={4} textAlign="center">
                                         Next Scheduled Game
                                     </Text>
                                     <NextScheduledGame
