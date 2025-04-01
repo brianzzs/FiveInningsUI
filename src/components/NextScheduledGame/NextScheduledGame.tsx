@@ -13,7 +13,7 @@ import {
   HStack,
   Divider,
 } from "@chakra-ui/react";
-import axios from "axios";
+import apiClient from "../../api/axiosInstance";
 import { FaUser, FaChartLine, FaBaseballBall, FaClock } from "react-icons/fa";
 import { MdCompareArrows } from "react-icons/md";
 import TeamLogo from "../TeamLogo/TeamLogo";
@@ -21,25 +21,7 @@ import { getTeamAbbreviation } from '../../constants/teams';
 import { useNavigate } from 'react-router-dom';
 import { THEME } from "../../constants";
 
-// Remove or comment out the old Team interface
-/*
-interface Team {
-  id: number;
-  name: string;
-  wins: number;
-  losses: number;
-  probable_pitcher: {
-    name: string;
-    hand: string;
-    wins: number;
-    losses: number;
-    era: number;
-    id: number;
-  };
-}
-*/
 
-// Update the Game interface to match the new flat structure
 interface Game {
     awayPitcher: string;
     awayPitcherERA: string | number;
@@ -51,7 +33,7 @@ interface Game {
     away_team_name: string;
     away_team_record: string;
     game_id: number;
-    game_datetime: string; // Assuming this maps from game_time_utc or game_time_local
+    game_datetime: string; 
     homePitcher: string;
     homePitcherERA: string | number;
     homePitcherHand: string;
@@ -98,18 +80,25 @@ const NextScheduledGame: React.FC<NextScheduledGameProps> = ({
     setGameData(null);
 
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/next_schedule/${teamId}`);
+      const response = await apiClient.get(`/next_schedule/${teamId}`);
       setGameData(response.data);
       if (onFetchComplete) {
         onFetchComplete();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error fetching scheduled game:", err);
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-         setError(`No scheduled game found for team ID ${teamId}.`);
-      } else {
-         setError("Failed to fetch the next scheduled game.");
+      let errorMessage = "Failed to fetch the next scheduled game.";
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const response = (err as { response?: { status?: number; data?: { error?: string } } }).response;
+        if (response?.status === 404) {
+          errorMessage = `No scheduled game found for team ID ${teamId}.`;
+        } else if (response?.data?.error) {
+          errorMessage = response.data.error;
+        } 
+      } else if (err instanceof Error) {
+         errorMessage = err.message;
       }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -7,7 +7,7 @@ import {
   Spinner,
   Text,
 } from "@chakra-ui/react";
-import axios from "axios";
+import apiClient from "../../api/axiosInstance";
 
 interface TeamDropdownProps {
   selectedTeam: number;
@@ -21,15 +21,16 @@ const TeamDropdown: React.FC<TeamDropdownProps> = ({
   const [teams, setTeams] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/teams`);
+        const response = await apiClient.get('/teams');
         setTeams(response.data);
-      } catch (error) {
-        setError("Failed to fetch teams. Please try again later.");
-        console.error("Failed to fetch teams:", error);
+      } catch (error: any) {
+        const errorMessage = error.response?.data?.error || error.message || "Failed to fetch teams. Please try again later.";
+        setError(errorMessage);
+        console.error("Failed to fetch teams:", error.response || error);
       } finally {
         setLoading(false);
       }

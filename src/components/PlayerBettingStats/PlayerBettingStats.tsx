@@ -17,7 +17,7 @@ import {
     Button,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '../../api/axiosInstance';
 import { THEME } from '../../constants';
 import { MdAccessTime, MdSportsBaseball, MdPerson } from 'react-icons/md';
 import { FaBaseballBall, FaRunning } from 'react-icons/fa';
@@ -379,8 +379,8 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
     const { data, isLoading, error } = useQuery<BettingStats>({
         queryKey: ['playerBettingStats', playerId],
         queryFn: async () => {
-            const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/player/betting-stats/${playerId}/20`
+            const response = await apiClient.get(
+                `/player/betting-stats/${playerId}/20`
             );
             if (response.data.error) {
                 throw new Error(response.data.error);

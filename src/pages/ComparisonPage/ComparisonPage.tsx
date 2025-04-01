@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '../../api/axiosInstance';
 import {
     Box,
     Container,
@@ -96,13 +96,12 @@ const StatDisplay: React.FC<{ label: string; value: number; icon?: React.Element
 const ComparisonPage: React.FC = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const navigate = useNavigate();
-    const apiUrl = import.meta.env.VITE_API_URL;
 
     const { data, isLoading, error } = useQuery<ComparisonData, Error>({
         queryKey: ['gameComparison', gameId],
         queryFn: async () => {
             if (!gameId) throw new Error("Game ID is required");
-            const response = await axios.get<ComparisonData>(`${apiUrl}/comparison/${gameId}`);
+            const response = await apiClient.get<ComparisonData>(`/comparison/${gameId}`);
             return response.data;
         },
         enabled: !!gameId,
