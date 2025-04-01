@@ -5,7 +5,7 @@ import {
     Spinner,
 } from "@chakra-ui/react";
 import { useQuery } from '@tanstack/react-query';
-import axios from "axios";
+import apiClient from "../../api/axiosInstance";
 import ScheduleCard from "../ScheduleCard/ScheduleCard";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +33,7 @@ interface Game {
     awayPitcherWins: string | number;
     away_team_id: number;
     away_team_name: string;
+    away_team_record: string;
     game_id: number;
     game_datetime: string;
     homePitcher: string;
@@ -43,18 +44,18 @@ interface Game {
     homePitcherWins: string | number;
     home_team_id: number;
     home_team_name: string;
+    home_team_record: string;
     status: string;
     venue: string;
 }
 
 const TodaySchedule: React.FC = () => {
-    const apiUrl = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
 
     const { data: gamesData = [], error, isLoading } = useQuery<Game[], Error>({
         queryKey: ['todaySchedule'],
         queryFn: async () => {
-            const response = await axios.get<Game[]>(`${apiUrl}/today_schedule`);
+            const response = await apiClient.get<Game[]>('/today_schedule');
             return response.data;
         },
         staleTime: 1000 * 60 * 10, 

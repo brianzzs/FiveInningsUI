@@ -22,7 +22,7 @@ import {
     Spinner,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '../../api/axiosInstance';
 import type { PlayerStats } from './interface';
 import { THEME } from '../../constants';
 import { MdSportsBaseball, MdPerson } from 'react-icons/md';
@@ -205,7 +205,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
         queryKey: ['playerStats', playerId, season],
         queryFn: async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/stats/${playerId}/${season}`);
+                const response = await apiClient.get(`/player/stats/${playerId}/${season}`);
                 if (response.data.error || !response.data || Object.keys(response.data).length === 0) {
                     throw new Error('No data available');
                 }
@@ -226,7 +226,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
     const { data: recentStats, isLoading: isLoadingRecent, error: recentStatsError } = useQuery({
         queryKey: ['recentStats', playerId, gamesCount],
         queryFn: async () => {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/player/recent-stats/${playerId}/${gamesCount}`);
+            const response = await apiClient.get(`/player/recent-stats/${playerId}/${gamesCount}`);
             if (response.data.error) {
                 throw new Error(response.data.error);
             }

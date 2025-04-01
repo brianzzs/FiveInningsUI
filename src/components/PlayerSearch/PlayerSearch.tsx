@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '../../api/axiosInstance';
 import { debounce } from 'lodash';
 import { Player } from './interface';
 
@@ -27,7 +27,6 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showResults, setShowResults] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const apiUrl = import.meta.env.VITE_API_URL;
 
     useOutsideClick({
         ref: ref,
@@ -36,7 +35,7 @@ const PlayerSearch: React.FC<PlayerSearchProps> = ({ onPlayerSelect }) => {
 
     const searchPlayers = async (query: string): Promise<Player[]> => {
         if (!query || query.length < 3) return [];
-        const response = await axios.get(`${apiUrl}/player/search/${query}`);
+        const response = await apiClient.get(`/player/search/${query}`);
         const players = response.data;
         players.sort((a: Player, b: Player) => a.full_name.localeCompare(b.full_name));
         return players;
