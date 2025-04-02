@@ -15,12 +15,13 @@ import {
     Tab,
     TabPanel,
     Button,
+    Icon,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../api/axiosInstance';
 import { THEME } from '../../constants';
-import { MdAccessTime, MdSportsBaseball, MdPerson } from 'react-icons/md';
-import { FaBaseballBall, FaRunning } from 'react-icons/fa';
+import { MdAccessTime, MdSportsBaseball, MdPerson, MdTrendingUp } from 'react-icons/md';
+import { FaBaseballBatBall } from 'react-icons/fa6';
 import TeamLogo from '../TeamLogo/TeamLogo';
 import { getTeamAbbreviation, getTeamIdFromName } from '../../constants/teams';
 
@@ -224,84 +225,57 @@ const PitcherStats = ({ stats }: { stats: Record<string, number> }) => {
     );
 };
 
-const GameLog = ({ games, playerType }: { games: Array<any>, playerType: string }) => {
+const GameLog = ({ games, playerType }: { games: Array<any>, playerType: "Hitter" | "Pitcher" }) => {
     const renderGameStats = (game: any) => {
-        if (playerType === "Pitcher") {
-            return (
-                <SimpleGrid columns={2} spacing={2}>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">IP: {game.innings_pitched}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">Earned Runs: {game.runs}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">H: {game.hits_allowed}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">K: {game.strikeouts}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">BB: {game.walks_allowed}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <Text fontWeight="bold">HR: {game.home_runs_allowed}</Text>
-                    </Flex>
-                </SimpleGrid>
-            );
-        } else {
-            return (
-                <SimpleGrid columns={2} spacing={2}>
-                    <Flex align="center" gap={2}>
-                        <FaBaseballBall />
-                        <Text fontWeight="bold">H/AB: {game.hits}/{game.at_bats}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <MdSportsBaseball />
-                        <Text fontWeight="bold">HR: {game.home_runs}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <FaRunning />
-                        <Text fontWeight="bold">RBI: {game.rbis}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <FaRunning />
-                        <Text fontWeight="bold">R: {game.runs}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <MdPerson />
-                        <Text fontWeight="bold">K: {game.strikeouts}</Text>
-                    </Flex>
-                    <Flex align="center" gap={2}>
-                        <MdSportsBaseball />
-                        <Text fontWeight="bold">BB: {game.walks}</Text>
-                    </Flex>
-                </SimpleGrid>
-            );
-        }
+        const isHitting = playerType === 'Hitter';
+        return (
+            <SimpleGrid columns={2} spacing={2} fontSize="sm">
+                {isHitting ? (
+                    <>
+                        <Flex align="center" gap={1.5}><Icon as={FaBaseballBatBall} color="gray.400" /><Text>H/AB: {game.hits}/{game.at_bats}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>Total Bases: {game.total_bases}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>HR: {game.home_runs}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdPerson} color="gray.400" /><Text>RBI: {game.rbis}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdPerson} color="gray.400" /><Text>R: {game.runs}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdPerson} color="gray.400" /><Text>K: {game.strikeouts}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>BB: {game.walks}</Text></Flex>
+                    </>
+                ) : (
+                    <>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>IP: {game.innings_pitched}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdTrendingUp} color="gray.400" /><Text>ER: {game.runs}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={FaBaseballBatBall} color="gray.400" /><Text>Hits Allowed: {game.hits_allowed}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdPerson} color="gray.400" /><Text>Strikeouts: {game.strikeouts}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>BB: {game.walks_allowed}</Text></Flex>
+                        <Flex align="center" gap={1.5}><Icon as={MdSportsBaseball} color="gray.400" /><Text>HR Allowed: {game.home_runs_allowed}</Text></Flex>
+                    </>
+                )}
+            </SimpleGrid>
+        );
     };
 
     return (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
             {games.map((game, index) => (
                 <Box
-                    key={index}
+                    key={`${game.game_date}-${index}-${playerType}`}
                     p={4}
                     bg="gray.700"
                     borderRadius="md"
-                    _hover={{ transform: 'scale(1.02)' }}
+                    _hover={{ transform: 'scale(1.02)', bg: 'gray.600' }}
                     transition="all 0.2s"
+                    color="white"
                 >
-                    <Flex align="center" justify="space-between" mb={2}>
+                    <Flex align="center" justify="space-between" mb={3}>
                         <Flex align="center" gap={2}>
-                            <Text fontWeight="bold">
+                            <TeamLogo teamId={getTeamIdFromName(game.opponent_team)} size="28px" />
+                            <Text fontWeight="bold" fontSize="sm">
                                 vs {getTeamAbbreviation(game.opponent_team)}
                             </Text>
-                            <TeamLogo teamId={getTeamIdFromName(game.opponent_team)} size="35px" marginTop="auto" />
                         </Flex>
                         <Flex align="center" gap={1}>
-                            <MdAccessTime />
-                            <Text fontSize="sm" color="gray.400">
+                            <Icon as={MdAccessTime} color="gray.400" />
+                            <Text fontSize="xs" color="gray.300">
                                 {new Date(game.game_date).toLocaleDateString()}
                             </Text>
                         </Flex>
@@ -313,7 +287,7 @@ const GameLog = ({ games, playerType }: { games: Array<any>, playerType: string 
     );
 };
 
-const calculateBettingStats = (games: Array<any>, playerType: string) => {
+const calculateBettingStats = (games: Array<any>, playerType: string): Record<string, number> => {
     const stats: Record<string, number> = {};
     
     if (playerType === "Pitcher") {
@@ -376,11 +350,11 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
 }) => {
     const [showGameLog, setShowGameLog] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
-    const { data, isLoading, error } = useQuery<BettingStats>({
-        queryKey: ['playerBettingStats', playerId],
+    const { data, isLoading, error } = useQuery<BettingStats, Error>({
+        queryKey: ['playerBettingStats', playerId, gamesCount],
         queryFn: async () => {
             const response = await apiClient.get(
-                `/player/betting-stats/${playerId}/20`
+                `/player/betting-stats/${playerId}/${gamesCount}`
             );
             if (response.data.error) {
                 throw new Error(response.data.error);
@@ -388,74 +362,64 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
             return response.data;
         },
         enabled: !!playerId,
+        staleTime: 1000 * 60 * 5,
     });
 
     if (isLoading) {
         return (
-            <Box display="flex" justifyContent="center" p={8}>
-                <Spinner size="xl" color="white" />
-            </Box>
+            <Flex justify="center" p={8}><Spinner size="xl" color="white" /></Flex>
         );
     }
 
     if (error || !data) {
+        const errorMessage = error instanceof Error ? error.message : "Error loading betting statistics.";
+        const displayMessage = errorMessage.includes('list index out of range') 
+            ? "Player doesn't have any recent games to analyze"
+            : errorMessage;
         return (
             <Box p={6} bg="gray.800" borderRadius="xl" color="white">
-                <Text fontSize="lg" textAlign="center" color="red.400">
-                    {error?.message === 'Error fetching recent player stats: list index out of range'
-                        ? "Player doesn't have any recent games to analyze"
-                        : "Error loading betting statistics. Please try again later."}
-                </Text>
+                <Text fontSize="lg" textAlign="center" color="red.400">{displayMessage}</Text>
             </Box>
         );
     }
 
     const totalGames = data.games_found || 0;
     
-    // Generate options dynamically from 1 up to totalGames
-    const availableGameCounts = totalGames > 0 ? Array.from({ length: totalGames }, (_, i) => i + 1) : [];
-
-    // Ensure gamesCount from props is within bounds [1, totalGames]
-    const clampedGamesCount = Math.max(1, gamesCount);
-    const validGamesCount = totalGames > 0 ? Math.min(clampedGamesCount, totalGames) : 0;
-
+    const availableGameCounts = totalGames > 0 ? Array.from({ length: Math.min(totalGames, 20) }, (_, i) => i + 1) : [];
+    const validGamesCount = Math.max(1, Math.min(gamesCount, totalGames, 20));
     const recentStats = data.recent_stats || [];
-    // Slice recent stats based on the valid count
-    const filteredRecentStats = recentStats.slice(0, validGamesCount);
-    // Calculate stats based on the sliced games
-    const filteredBettingStats = calculateBettingStats(filteredRecentStats, data.player_type);
+    const statsToCalculate = recentStats.slice(0, validGamesCount);
+    const bettingStatsCalculated = calculateBettingStats(statsToCalculate, data.player_type);
 
-    const renderContent = () => {
+    const gameLogPlayerType = data.player_type === 'Pitcher' ? 'Pitcher' : 'Hitter';
+
+    const renderBettingContent = () => {
         if (data.player_type === "TWP") {
-            const hittingStats = calculateBettingStats(filteredRecentStats, "Hitter");
-            const pitchingStats = calculateBettingStats(filteredRecentStats, "Pitcher");
+            const hittingStats = calculateBettingStats(statsToCalculate, "Hitter");
+            const pitchingStats = calculateBettingStats(statsToCalculate, "Pitcher");
             
             return (
-                <Tabs variant="enclosed" colorScheme="blue" onChange={setActiveTab}>
+                <Tabs variant="enclosed" colorScheme="blue" defaultIndex={0} onChange={(index) => setActiveTab(index)}>
                     <TabList>
-                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Hitting</Tab>
-                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Pitching</Tab>
+                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Hitting Props</Tab>
+                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Pitching Props</Tab>
                     </TabList>
                     <TabPanels>
-                        <TabPanel p={0} pt={4}>
-                            <HitterStats stats={hittingStats} />
-                        </TabPanel>
-                        <TabPanel p={0} pt={4}>
-                            <PitcherStats stats={pitchingStats} />
-                        </TabPanel>
+                        <TabPanel p={0} pt={4}><HitterStats stats={hittingStats} /></TabPanel>
+                        <TabPanel p={0} pt={4}><PitcherStats stats={pitchingStats} /></TabPanel>
                     </TabPanels>
                 </Tabs>
             );
         } else if (data.player_type === "Pitcher") {
-            return <PitcherStats stats={filteredBettingStats} />;
+            return <PitcherStats stats={bettingStatsCalculated} />;
         } else {
-            return <HitterStats stats={filteredBettingStats} />;
+            return <HitterStats stats={bettingStatsCalculated} />;
         }
     };
 
     return (
         <Box bg="gray.800" p={6} borderRadius="xl" color="white">
-            <Flex justify="space-between" align="center" mb={6}>
+            <Flex justify="space-between" align="center" mb={6} wrap="wrap" gap={2}>
                 <Heading size="md">
                     Betting Performance Stats
                     {data.player_type && (
@@ -464,29 +428,31 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
                         </Badge>
                     )}
                 </Heading>
-                {availableGameCounts.length > 0 && (
-                    <Box>
-                        <Select
-                            value={validGamesCount}
-                            onChange={(e) => onGamesCountChange(Number(e.target.value))}
-                            bg="gray.700"
-                            color="red.500"
-                            maxW="200px"
-                            fontFamily={THEME.fonts.body}
-                            disabled={totalGames === 0}
-                        >
-                            {availableGameCounts.map(num => (
-                                <option key={num} value={num}>Last {num} Games</option>
-                            ))}
-                        </Select>
-                    </Box>
-                )}
+                <Box>
+                    <Select
+                        value={validGamesCount}
+                        onChange={(e) => onGamesCountChange(Number(e.target.value))}
+                        bg="gray.700"
+                        color="white" 
+                        borderColor="gray.600"
+                        focusBorderColor={THEME.colors.accent}
+                        maxW="180px"
+                        size="sm"
+                        borderRadius="md"
+                        disabled={availableGameCounts.length === 0}
+                    >
+                        {availableGameCounts.length === 0 && <option>No Games</option>} 
+                        {availableGameCounts.map(num => (
+                            <option key={num} value={num} style={{ backgroundColor: '#2D3748', color: 'white' }}>Last {num} Games</option>
+                        ))}
+                    </Select>
+                </Box>
             </Flex>
 
-            {totalGames > 0 ? (
+            {statsToCalculate.length > 0 ? (
                 <>
-                    <Text mb={4} color="gray.400">
-                        Based on {validGamesCount} most recent games. Percentages show how often the player hits the betting prop.
+                    <Text mb={4} color="gray.400" fontSize="sm">
+                        Hit rates based on the last {validGamesCount} games played.
                     </Text>
 
                     <Button
@@ -494,40 +460,24 @@ const PlayerBettingStats: React.FC<BettingStatsProps> = ({
                         mb={4}
                         colorScheme="blue"
                         variant="outline"
+                        size="sm"
                     >
                         {showGameLog ? 'Hide Game Log' : 'Show Game Log'}
                     </Button>
 
-                    {showGameLog && recentStats.length > 0 && (
-                        <>
-                            {data.player_type === "TWP" ? (
-                                <Tabs variant="enclosed" colorScheme="blue" onChange={setActiveTab}>
-                                    <TabList>
-                                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Hitting Games</Tab>
-                                        <Tab _selected={{ color: 'white', bg: 'blue.700' }}>Pitching Games</Tab>
-                                    </TabList>
-                                    <TabPanels>
-                                        <TabPanel p={0} pt={4}>
-                                            <GameLog games={filteredRecentStats} playerType="Hitter" />
-                                        </TabPanel>
-                                        <TabPanel p={0} pt={4}>
-                                            <GameLog games={filteredRecentStats} playerType="Pitcher" />
-                                        </TabPanel>
-                                    </TabPanels>
-                                </Tabs>
-                            ) : (
-                                <GameLog games={filteredRecentStats} playerType={data.player_type} />
-                            )}
-                            <Divider my={6} />
-                        </>
+                    {showGameLog && (
+                        <Box mb={6}> 
+                            <GameLog games={statsToCalculate} playerType={gameLogPlayerType} />
+                            <Divider my={6} borderColor="gray.600" />
+                        </Box>
                     )}
 
-                    {renderContent()}
+                    {renderBettingContent()}
                 </>
             ) : (
-                <Text fontSize="lg" textAlign="center" color="gray.400">
-                    No recent games available for betting analysis
-                </Text>
+                 <Text fontSize="lg" textAlign="center" color="gray.400" mt={4}>
+                     No recent games found for analysis.
+                 </Text>
             )}
         </Box>
     );

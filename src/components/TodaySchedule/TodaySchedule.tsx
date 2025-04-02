@@ -58,7 +58,9 @@ const TodaySchedule: React.FC = () => {
             const response = await apiClient.get<Game[]>('/today_schedule');
             return response.data;
         },
-        staleTime: 1000 * 60 * 10, 
+        staleTime: 1000 * 60 * 2, // 2 minutes
+        refetchInterval: 1000 * 60 * 2, // Refetch every 2 minutes
+        refetchIntervalInBackground: true, // Continue refetching even when the window is in the background
     });
 
     const handlePitcherSelect = (playerId: number) => {
