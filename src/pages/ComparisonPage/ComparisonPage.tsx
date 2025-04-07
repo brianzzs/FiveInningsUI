@@ -70,7 +70,8 @@ interface Pitcher {
 interface TeamInfo {
     id: number;
     lineup: Player[] | null;
-    name: string; 
+    name: string;
+    lineup_status?: string;
 }
 
 interface GameInfo {
@@ -118,6 +119,20 @@ const StatDisplay: React.FC<{ label: string; value: number; icon?: React.Element
     );
 };
 
+const getAvgColor = (avgString: string | undefined): string => {
+    if (!avgString || avgString === '-') return 'gray.100';
+    try {
+        const avg = parseFloat(avgString);
+        if (isNaN(avg)) return 'gray.100'; 
+
+        if (avg >= 0.299) return 'green.300';
+        if (avg < 0.250) return 'red.300';
+        return 'yellow.300';
+    } catch (e) {
+        return 'gray.100';
+    }
+};
+
 const H2HTable: React.FC<{ players: Player[] | null; pitcherName: string; teamName: string }> = ({ players, pitcherName, teamName }) => {
     if (!players || players.length === 0) {
         return <Text fontSize="sm" color="gray.400" mt={2}>No opposing lineup data available for H2H.</Text>;
@@ -152,12 +167,12 @@ const H2HTable: React.FC<{ players: Player[] | null; pitcherName: string; teamNa
                     </Thead>
                     <Tbody>
                         {playersWithH2H.map((player) => (
-                             <Tr key={player.id} _hover={{ bg: "gray.600" }} transition="background-color 0.2s">
+                            <Tr key={player.id} _hover={{ bg: "gray.600" }} transition="background-color 0.2s">
                                 <Td px={2} py={1.5} fontSize="xs" color="gray.100" borderBottomColor="gray.600">{player.name}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.PA ?? '-'}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.AB ?? '-'}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.H ?? '-'}</Td>
-                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.AVG ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color={getAvgColor(player.h2h_stats?.AVG)} fontWeight="bold" borderBottomColor="gray.600">{player.h2h_stats?.AVG ?? '-'}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.OBP ?? '-'}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.SLG ?? '-'}</Td>
                                 <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.OPS ?? '-'}</Td>
@@ -197,11 +212,26 @@ const ComparisonPage: React.FC = () => {
         navigate(`/stats`, { state: { selectedTeamId: teamId } });
     };
 
-    const renderLineup = (lineup: Player[] | null) => (
+    const renderLineup = (lineup: Player[] | null, lineupStatus: string | undefined) => (
         <VStack align="start" spacing={1.5} w="100%" p={2}>
-            <Heading size="xs" color="gray.100" mb={1.5} display="flex" alignItems="center" w="100%">
-                <Icon as={MdPeople} mr={2} boxSize={4.5}/> Lineup
-            </Heading>
+            <Flex align="center" w="100%">
+                <Heading size="xs" color="gray.100" mb={1.5} display="flex" alignItems="center">
+                    <Icon as={MdPeople} mr={2} boxSize={4.5}/> Lineup
+                </Heading>
+                {lineupStatus && (
+                    <Badge
+                        ml={2}
+                        mb={1}
+                        fontSize="0.7em"
+                        colorScheme={lineupStatus === 'Confirmed' ? 'green' : 'yellow'}
+                        variant="subtle"
+                        borderRadius="full"
+                        px={2}
+                    >
+                        {lineupStatus}
+                    </Badge>
+                )}
+            </Flex>
             {lineup && lineup.length > 0 ? (
                 <VStack align="start" spacing={1} pl={2} w="100%">
                     {lineup.map((player) => (
@@ -339,24 +369,26 @@ const ComparisonPage: React.FC = () => {
                                     <Card bg="gray.700" borderRadius="lg" shadow="md" overflow="hidden">
                                          <CardBody p={5}>
                                             <VStack spacing={4} align="stretch">
-                                                 {renderLineup(data.game_info.away_team.lineup)}
+                                                 {renderLineup(data.game_info.away_team.lineup, data.game_info.away_team.lineup_status)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderPitcherInfo(data.game_info.away_pitcher)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderComparisonStats(data.team_comparison.away, data.team_comparison.lookback_games)}
+                                                 <Divider borderColor="gray.600" />
                                                  <H2HTable players={data.game_info.away_team.lineup} pitcherName={data.game_info.home_pitcher.name} teamName={data.game_info.away_team.name} />
+
                                             </VStack>
                                         </CardBody>
                                     </Card>
-
                                      <Card bg="gray.700" borderRadius="lg" shadow="md" overflow="hidden">
                                          <CardBody p={5}>
                                             <VStack spacing={4} align="stretch">
-                                                 {renderLineup(data.game_info.home_team.lineup)}
+                                                 {renderLineup(data.game_info.home_team.lineup, data.game_info.home_team.lineup_status)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderPitcherInfo(data.game_info.home_pitcher)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderComparisonStats(data.team_comparison.home, data.team_comparison.lookback_games)}
+                                                 <Divider borderColor="gray.600" />
                                                  <H2HTable players={data.game_info.home_team.lineup} pitcherName={data.game_info.away_pitcher.name} teamName={data.game_info.home_team.name} />
                                              </VStack>
                                         </CardBody>
