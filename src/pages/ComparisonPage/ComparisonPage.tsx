@@ -19,7 +19,14 @@ import {
     CardHeader,
     CardBody,
     Icon,
-    Badge
+    Badge,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    TableContainer,
 } from '@chakra-ui/react';
 import { MdCalendarToday, MdStadium, MdInfoOutline, MdTrendingUp, MdBarChart, MdPeople, MdSportsBaseball, MdOutlineErrorOutline } from 'react-icons/md';
 import { NavBar } from '../../components/Layout/NavBar';
@@ -29,10 +36,28 @@ import { getTeamAbbreviation } from '../../constants/teams';
 import { THEME } from '../../constants';
 import { StatisticsData } from '../../types/StatisticsData';
 
+interface H2HStats {
+    PA: number;
+    AB?: number;
+    H?: number;
+    AVG?: string;
+    OBP?: string;
+    SLG?: string;
+    OPS?: string;
+    HR?: number;
+    RBI?: number;
+    SO?: number;
+    BB?: number;
+    '2B'?: number;
+    '3B'?: number;
+}
+
 interface Player {
     id: number;
     name: string;
     position: string;
+    avg?: string;
+    h2h_stats?: H2HStats;
 }
 
 interface Pitcher {
@@ -93,6 +118,62 @@ const StatDisplay: React.FC<{ label: string; value: number; icon?: React.Element
     );
 };
 
+const H2HTable: React.FC<{ players: Player[] | null; pitcherName: string; teamName: string }> = ({ players, pitcherName, teamName }) => {
+    if (!players || players.length === 0) {
+        return <Text fontSize="sm" color="gray.400" mt={2}>No opposing lineup data available for H2H.</Text>;
+    }
+
+    const playersWithH2H = players.filter(p => p.h2h_stats && p.h2h_stats.PA > 0);
+
+    if (playersWithH2H.length === 0) {
+        return <Text fontSize="sm" color="gray.400" mt={2}>No significant H2H history against {pitcherName}.</Text>;
+    }
+
+    return (
+        <Box mt={4}>
+            <Heading size="xs" color="gray.100" mb={2}>{getTeamAbbreviation(teamName)} vs {pitcherName}</Heading>
+            <TableContainer whiteSpace="normal" overflowX="auto" border="1px solid" borderColor="gray.600" borderRadius="md">
+                <Table variant="simple" size="sm">
+                    <Thead bg="gray.600">
+                        <Tr>
+                            <Th px={2} py={2} color="gray.100" textTransform="none">Player</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">PA</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">AB</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">H</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">AVG</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">OBP</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">SLG</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">OPS</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">HR</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">RBI</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">SO</Th>
+                            <Th px={2} py={2} color="gray.100" isNumeric textTransform="none">BB</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {playersWithH2H.map((player) => (
+                             <Tr key={player.id} _hover={{ bg: "gray.600" }} transition="background-color 0.2s">
+                                <Td px={2} py={1.5} fontSize="xs" color="gray.100" borderBottomColor="gray.600">{player.name}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.PA ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.AB ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.H ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.AVG ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.OBP ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.SLG ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.OPS ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.HR ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.RBI ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.SO ?? '-'}</Td>
+                                <Td px={2} py={1.5} fontSize="xs" isNumeric color="gray.100" borderBottomColor="gray.600">{player.h2h_stats?.BB ?? '-'}</Td>
+                            </Tr>
+                        ))}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        </Box>
+    );
+};
+
 const ComparisonPage: React.FC = () => {
     const { gameId } = useParams<{ gameId: string }>();
     const navigate = useNavigate();
@@ -116,25 +197,30 @@ const ComparisonPage: React.FC = () => {
         navigate(`/stats`, { state: { selectedTeamId: teamId } });
     };
 
-    const renderLineup = (lineup: Player[] | null, pitcher: Pitcher) => (
+    const renderLineup = (lineup: Player[] | null) => (
         <VStack align="start" spacing={1.5} w="100%" p={2}>
             <Heading size="xs" color="gray.100" mb={1.5} display="flex" alignItems="center" w="100%">
-                 <Icon as={MdPeople} mr={2} boxSize={4.5}/> Lineup
+                <Icon as={MdPeople} mr={2} boxSize={4.5}/> Lineup
             </Heading>
             {lineup && lineup.length > 0 ? (
                 <VStack align="start" spacing={1} pl={2} w="100%">
                     {lineup.map((player) => (
-                        <Text
-                            key={player.id}
-                            fontSize="sm"
-                            cursor="pointer"
-                            _hover={{ color: THEME.colors.accent, textDecoration: 'underline' }}
-                            onClick={() => handlePlayerClick(player.id)}
-                            lineHeight="short"
-                            color="whiteAlpha.900"
-                        >
-                            {player.name} <Text as="span" color="gray.400" fontSize="xs">({player.position})</Text>
-                        </Text>
+                        <Flex key={player.id} align="center" w="100%">
+                             <Text
+                                fontSize="sm"
+                                cursor="pointer"
+                                _hover={{ color: THEME.colors.accent, textDecoration: 'underline' }}
+                                onClick={() => handlePlayerClick(player.id)}
+                                lineHeight="short"
+                                color="whiteAlpha.900"
+                                mr={1}
+                            >
+                                {player.name}
+                                <Text as="span" color="gray.400" fontSize="0.7rem" ml={1.5}>
+                                    ({player.avg ? `${player.avg} AVG / ` : ''}{player.position})
+                                </Text>
+                            </Text>
+                        </Flex>
                     ))}
                 </VStack>
             ) : (
@@ -143,27 +229,29 @@ const ComparisonPage: React.FC = () => {
                     <Text>No lineup released yet.</Text>
                 </HStack>
             )}
-            <Divider my={3} borderColor="gray.500" />
-             <Heading size="xs" color="gray.100" mb={1.5} display="flex" alignItems="center" w="100%">
-                 <Icon as={MdSportsBaseball} mr={2} boxSize={4.5}/> Starting Pitcher
-            </Heading>
-            <Box pl={2}>
-                <Text
-                    fontSize="sm"
-                    fontWeight="medium"
-                    cursor="pointer"
-                    _hover={{ color: THEME.colors.accent, textDecoration: 'underline' }}
-                    onClick={() => handlePlayerClick(pitcher.id)}
-                    lineHeight="short"
-                    color="whiteAlpha.900"
-                >
-                    {pitcher.name} <Text as="span" color="gray.400" fontSize="xs">({pitcher.hand})</Text>
-                </Text>
-                <Text fontSize="xs" color="gray.100">
-                    {pitcher.season_era !== 'TBD' ? `${pitcher.season_era} ERA` : 'Season ERA TBD'}
-                </Text>
-            </Box>
         </VStack>
+    );
+
+    const renderPitcherInfo = (pitcher: Pitcher) => (
+        <Box pl={2}>
+            <Heading size="xs" color="gray.100" mb={1.5} display="flex" alignItems="center" w="100%">
+                <Icon as={MdSportsBaseball} mr={2} boxSize={4.5}/> Starting Pitcher
+            </Heading>
+            <Text
+                fontSize="sm"
+                fontWeight="medium"
+                cursor="pointer"
+                _hover={{ color: THEME.colors.accent, textDecoration: 'underline' }}
+                onClick={() => handlePlayerClick(pitcher.id)}
+                lineHeight="short"
+                color="whiteAlpha.900"
+            >
+                {pitcher.name} <Text as="span" color="gray.400" fontSize="xs">({pitcher.hand})</Text>
+            </Text>
+            <Text fontSize="xs" color="gray.100">
+                {pitcher.season_era !== 'TBD' ? `${pitcher.season_era} ERA` : 'Season ERA TBD'}
+            </Text>
+        </Box>
     );
 
     const renderComparisonStats = (stats: StatisticsData, lookback: number) => (
@@ -251,9 +339,12 @@ const ComparisonPage: React.FC = () => {
                                     <Card bg="gray.700" borderRadius="lg" shadow="md" overflow="hidden">
                                          <CardBody p={5}>
                                             <VStack spacing={4} align="stretch">
-                                                 {renderLineup(data.game_info.away_team.lineup, data.game_info.away_pitcher)}
+                                                 {renderLineup(data.game_info.away_team.lineup)}
+                                                 <Divider borderColor="gray.600" />
+                                                 {renderPitcherInfo(data.game_info.away_pitcher)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderComparisonStats(data.team_comparison.away, data.team_comparison.lookback_games)}
+                                                 <H2HTable players={data.game_info.away_team.lineup} pitcherName={data.game_info.home_pitcher.name} teamName={data.game_info.away_team.name} />
                                             </VStack>
                                         </CardBody>
                                     </Card>
@@ -261,9 +352,12 @@ const ComparisonPage: React.FC = () => {
                                      <Card bg="gray.700" borderRadius="lg" shadow="md" overflow="hidden">
                                          <CardBody p={5}>
                                             <VStack spacing={4} align="stretch">
-                                                 {renderLineup(data.game_info.home_team.lineup, data.game_info.home_pitcher)}
+                                                 {renderLineup(data.game_info.home_team.lineup)}
+                                                 <Divider borderColor="gray.600" />
+                                                 {renderPitcherInfo(data.game_info.home_pitcher)}
                                                  <Divider borderColor="gray.600" />
                                                  {renderComparisonStats(data.team_comparison.home, data.team_comparison.lookback_games)}
+                                                 <H2HTable players={data.game_info.home_team.lineup} pitcherName={data.game_info.away_pitcher.name} teamName={data.game_info.home_team.name} />
                                              </VStack>
                                         </CardBody>
                                     </Card>
