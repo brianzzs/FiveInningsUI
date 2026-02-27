@@ -1,99 +1,137 @@
-import React from 'react';
-import { Box, Grid, GridItem, Heading, Text, Button, VStack } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
-import { NavBar } from '../../components/Layout/NavBar';
-import TodaySchedule from '../../components/TodaySchedule/TodaySchedule';
-import FooterComponent from '../../components/Layout/Footer/Footer';
-import { ROUTES, THEME } from '../../constants';
-import backgroundImage from '../../img/bg2.jpg';
-import { FaChartLine } from 'react-icons/fa';
-import { Icon } from '@chakra-ui/react';
+import React from "react";
+import {
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  HStack,
+  Icon,
+  SimpleGrid,
+  Stat,
+  StatLabel,
+  StatNumber,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { Link } from "react-router-dom";
+import { FaChartLine } from "react-icons/fa";
+import { ROUTES } from "../../constants";
+import TodaySchedule from "../../components/TodaySchedule/TodaySchedule";
+import { AppShell } from "../../components/Layout/AppShell";
+import SectionCard from "../../components/UI/SectionCard";
+
+const heroStats = [
+  { label: "Tracked Teams", value: "30" },
+  { label: "Lookback Window", value: "30D" },
+  { label: "Core Angles", value: "NRFI/F5" },
+];
 
 export const StartPage: React.FC = () => {
-    return (
-        <Box position="relative" minHeight="100vh" bg={THEME.colors.background} width="100%">
-            <NavBar />
-            <Grid
-                templateColumns="repeat(12, 1fr)"
-                gap={4}
-                mt="4rem"
-                pb="60px"
-                h="auto"
-                w="100%"
-                background={`linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), url(${backgroundImage})`}
-                backgroundSize="cover"
-                backgroundPosition="left 30%"
-                backgroundRepeat="no-repeat"
-            >
-                <GridItem colSpan={12} mt="4rem">
-                    <VStack spacing={8} align="center" px="2rem">
-                        <Heading
-                            as="h1"
-                            fontSize={["3xl", "4xl", "6xl"]}
-                            color="white"
-                            fontFamily={THEME.fonts.heading}
-                            fontWeight="800"
-                            textAlign="center"
-                            textTransform="uppercase"
-                            letterSpacing="wide"
-                        >
-                            <Text as="span" color={THEME.colors.accent}>MLB</Text> First 5 Innings
-                            <Text fontSize={["xl", "2xl", "3xl"]} color="white" mt={2}>
-                                Advanced Betting Analytics
-                            </Text>
-                        </Heading>
+  return (
+    <AppShell containerMaxW="container.xl">
+      <VStack spacing={8} align="stretch">
+        <SectionCard p={0} minH={{ base: "420px", md: "460px" }}>
+          <Grid templateColumns={{ base: "1fr", xl: "7fr 5fr" }} minH="inherit">
+            <GridItem>
+              <Flex h="100%" p={{ base: 6, md: 10 }} direction="column" justify="space-between" gap={8}>
+                <VStack align="start" spacing={5} maxW="760px">
+                  <Text
+                    bg="accent.500"
+                    color="white"
+                    fontWeight="700"
+                    px={3}
+                    py={1.5}
+                    borderRadius="full"
+                    fontSize="11px"
+                    letterSpacing="0.14em"
+                    textTransform="uppercase"
+                  >
+                    MLB First Five Intelligence
+                  </Text>
+                  <Heading as="h1" fontSize={{ base: "3xl", md: "5xl", xl: "6xl" }} lineHeight="0.9" letterSpacing="0.04em" textTransform="uppercase">
+                    Read The
+                    <Text as="span" color="accent.500"> Board</Text>
+                    <br /> Before The First Pitch
+                  </Heading>
+                  <Text color="textSecondary" fontSize={{ base: "md", md: "lg" }} maxW="700px">
+                    Team trend signals, pitcher context, and matchup probability surfaces in a single betting command center.
+                    No feature additions, just a sharper interface for faster decisions.
+                  </Text>
+                  <HStack spacing={3} wrap="wrap">
+                    <Link to={ROUTES.STATISTICS}>
+                      <Button variant="cta" size="lg" leftIcon={<Icon as={FaChartLine} />}>
+                        Open Team Dashboard
+                      </Button>
+                    </Link>
+                    <Link to={ROUTES.PLAYERS}>
+                      <Button variant="ghostPanel" size="lg">
+                        Explore Players
+                      </Button>
+                    </Link>
+                  </HStack>
+                </VStack>
 
-                        <Text
-                            color="gray.300"
-                            fontSize={["md", "lg"]}
-                            fontFamily={THEME.fonts.body}
-                            maxW="800px"
-                            textAlign="center"
-                            lineHeight="tall"
-                        >
-                            Make data-driven betting decisions with our comprehensive First 5 Innings statistics, 
-                            NRFI predictions, and advanced MLB analytics including PLAYER STATS.
-                        </Text>
-
-                        <Link to={ROUTES.STATISTICS}>
-                            <Button
-                                bg={THEME.colors.accent}
-                                _hover={{
-                                    bg: '#c41230',
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: "lg"
-                                }}
-                                size="lg"
-                                px="2rem"
-                                py="1.8rem"
-                                color="white"
-                                fontFamily={THEME.fonts.heading}
-                                fontWeight="600"
-                                borderRadius="full"
-                                leftIcon={<Icon as={FaChartLine} />}
-                            >
-                                Analyze Team Stats
-                            </Button>
-                        </Link>
-                    </VStack>
-                </GridItem>
-            </Grid>
-            <Grid mb={"2rem"}>
-                <GridItem colSpan={12}>
-                    <Box
-                        bg="rgba(30, 30, 47, 0.9)"
-                        borderRadius="xl"
-                        p={6}
-                        mx={[4, 8, 16]}
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={3}>
+                  {heroStats.map((item) => (
+                    <Stat
+                      key={item.label}
+                      p={4}
+                      borderWidth="1px"
+                      borderColor="borderSubtle"
+                      borderRadius="lg"
+                      bg="panelSubtle"
                     >
-                        <TodaySchedule />
-                    </Box>
-                </GridItem>
-            </Grid>
+                      <StatLabel fontSize="11px" textTransform="uppercase" letterSpacing="0.12em" color="textMuted" mb={1}>
+                        {item.label}
+                      </StatLabel>
+                      <StatNumber fontSize="2xl" lineHeight="1">
+                        {item.value}
+                      </StatNumber>
+                    </Stat>
+                  ))}
+                </SimpleGrid>
+              </Flex>
+            </GridItem>
 
-            <FooterComponent />
-        </Box>
-    );
+            <GridItem display={{ base: "none", xl: "block" }} borderLeftWidth="1px" borderColor="borderSubtle">
+              <Flex h="100%" p={8} direction="column" justify="space-between" bg="panelSubtle">
+                <VStack align="start" spacing={3}>
+                  <Text fontSize="11px" textTransform="uppercase" letterSpacing="0.12em" fontWeight={700} color="textMuted">
+                    Focus Areas
+                  </Text>
+                  <Heading size="md" textTransform="uppercase" letterSpacing="0.05em" lineHeight="1.05">
+                    Daily Matchup Grid
+                  </Heading>
+                  <Text color="textSecondary" fontSize="sm">
+                    Start from live schedule cards, jump into team dashboard context, then drill down to player splits.
+                  </Text>
+                </VStack>
+                <VStack align="start" spacing={4}>
+                  {[
+                    "First-five trend scoring",
+                    "Pitcher click-through workflow",
+                    "Game-level comparison panels",
+                  ].map((bullet) => (
+                    <HStack key={bullet} spacing={3} align="start">
+                      <Flex mt={1} w="9px" h="9px" borderRadius="full" bg="brand.500" />
+                      <Text color="textSecondary" fontSize="sm">
+                        {bullet}
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Flex>
+            </GridItem>
+          </Grid>
+        </SectionCard>
+
+        <SectionCard>
+          <TodaySchedule />
+        </SectionCard>
+      </VStack>
+    </AppShell>
+  );
 };
 
 export default StartPage;

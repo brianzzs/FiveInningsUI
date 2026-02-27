@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
-  FormControl,
-  FormLabel,
-  Select,
-  Box,
-  Spinner,
-  Text,
-} from "@chakra-ui/react";
+import React from "react";
+import { Box, FormControl, FormLabel, Select, Spinner, Text } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../api/axiosInstance";
 
 interface TeamDropdownProps {
@@ -14,40 +8,25 @@ interface TeamDropdownProps {
   onTeamChange: (teamId: number) => void;
 }
 
-const TeamDropdown: React.FC<TeamDropdownProps> = ({
-  selectedTeam,
-  onTeamChange,
-}) => {
-  const [teams, setTeams] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const response = await apiClient.get('/teams');
-        setTeams(response.data);
-      } catch (error: any) {
-        const errorMessage = error.response?.data?.error || error.message || "Failed to fetch teams. Please try again later.";
-        setError(errorMessage);
-        console.error("Failed to fetch teams:", error.response || error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeams();
-  }, []);
+const TeamDropdown: React.FC<TeamDropdownProps> = ({ selectedTeam, onTeamChange }) => {
+  const { data, isLoading, error } = useQuery<Record<number, string>, Error>({
+    queryKey: ["teams"],
+    queryFn: async () => {
+      const response = await apiClient.get<Record<number, string>>("/teams");
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 30,
+  });
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onTeamChange(Number(event.target.value));
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box width="100%" textAlign="center" py={4}>
-        <Spinner size="lg" color="teal.500" />
-        <Text mt={2} color="gray.500">
+        <Spinner size="md" color="accent.500" />
+        <Text mt={2} color="textSecondary" fontSize="sm">
           Loading teams...
         </Text>
       </Box>
@@ -57,28 +36,22 @@ const TeamDropdown: React.FC<TeamDropdownProps> = ({
   if (error) {
     return (
       <Box width="100%" textAlign="center" py={4}>
-        <Text color="red.500" fontWeight="bold">
-          {error}
+        <Text color="red.500" fontWeight="bold" fontSize="sm">
+          {error.message}
         </Text>
       </Box>
     );
   }
 
+  const teams = data ?? {};
+
   return (
     <Box width="100%">
       <FormControl id="team-select" isRequired>
-        <FormLabel fontWeight="bold" color="teal.600">
-          Select a Team
+        <FormLabel fontWeight="bold" color="textSecondary" fontSize="sm">
+          Select Team
         </FormLabel>
-        <Select
-          placeholder="Select a Team"
-          value={selectedTeam}
-          onChange={handleChange}
-          bg="white"
-          focusBorderColor="teal.500"
-          borderRadius="md"
-          shadow="sm"
-        >
+        <Select placeholder="Select a Team" value={selectedTeam} onChange={handleChange}>
           {Object.entries(teams)
             .sort(([, a], [, b]) => a.localeCompare(b))
             .map(([teamId, teamName]) => (

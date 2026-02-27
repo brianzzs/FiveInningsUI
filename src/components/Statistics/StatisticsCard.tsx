@@ -1,85 +1,51 @@
 import React from "react";
-import {
-    Box,
-    Text,
-    Flex,
-    Icon,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, Flex, Icon, Text, VStack } from "@chakra-ui/react";
 import { FaBaseballBall } from "react-icons/fa";
-import { THEME } from "../../constants";
 
 interface StatisticCardProps {
-    data: number;
-    id: string;
-    label: string;
+  data: number;
+  id: string;
+  label: string;
 }
 
 const getColor = (data: number): string => {
-    if (data > 70) {
-        return THEME.colors.success;
-    } else if (data >= 40 && data <= 70) {
-        return THEME.colors.warning;
-    } else {
-        return THEME.colors.danger;
-    }
+  if (data > 70) {
+    return "statGood";
+  }
+  if (data >= 40) {
+    return "statWarn";
+  }
+  return "statBad";
 };
 
 const StatisticCard: React.FC<StatisticCardProps> = ({ data, id, label }) => {
-    const backgroundColor = getColor(data);
+  const backgroundColor = getColor(data);
 
-    return (
-        <Box
-            id={id}
-            bg={THEME.colors.cardBg}
-            color="white"
-            borderRadius="xl"
-            boxShadow="xl"
-            p={6}
-            textAlign="center"
-            transition="all 0.3s"
-            _hover={{ 
-                transform: "translateY(-5px)",
-                boxShadow: "2xl"
-            }}
-            border="1px solid"
-            borderColor="gray.700"
-        >
-            <Flex
-                alignItems="center"
-                justifyContent="center"
-                mb={4}
-                w={16}
-                h={16}
-                mx="auto"
-                bg={backgroundColor}
-                borderRadius="full"
-                boxShadow="lg"
-            >
-                <Icon as={FaBaseballBall} w={8} h={8} color="white" />
-            </Flex>
-            <VStack spacing={3}>
-                <Text
-                    fontSize="xl"
-                    fontWeight="bold"
-                    letterSpacing="wide"
-                    color="gray.100"
-                    textTransform="uppercase"
-                >
-                    {label}
-                </Text>
-                <Text
-                    fontSize="5xl"
-                    fontWeight="bold"
-                    color={backgroundColor}
-                    textShadow="2px 2px 4px rgba(0,0,0,0.4)"
-                >
-                    {data}%
-                </Text>
-            </VStack>
-        </Box>
-    );
+  return (
+    <Box
+      id={id}
+      bg="panelSubtle"
+      borderWidth="1px"
+      borderColor="borderSubtle"
+      borderRadius="xl"
+      p={5}
+      textAlign="center"
+      transition="all 0.2s"
+      _hover={{ transform: "translateY(-2px)", borderColor: "borderStrong" }}
+    >
+      <Flex alignItems="center" justifyContent="center" mb={4} w={14} h={14} mx="auto" bg={backgroundColor} borderRadius="full" boxShadow="md">
+        <Icon as={FaBaseballBall} w={7} h={7} color="white" />
+      </Flex>
+      <VStack spacing={2}>
+        <Text fontSize="sm" fontWeight="700" letterSpacing="0.07em" color="textMuted" textTransform="uppercase">
+          {label}
+        </Text>
+        <Text fontSize={{ base: "3xl", md: "4xl" }} fontWeight="bold" color={backgroundColor}>
+          {data}%
+        </Text>
+      </VStack>
+    </Box>
+  );
 };
 
 export default StatisticCard;

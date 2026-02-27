@@ -1,31 +1,29 @@
 import React from "react";
 import { Box, Link, Text } from "@chakra-ui/react";
-import { THEME } from '../../../constants';
 
 const FooterComponent: React.FC = () => {
   return (
     <Box
       as="footer"
-      position="fixed"
-      bottom={0}
-      width="100%"
-      bg={THEME.colors.navBackground}
-      color="white"
-      p={4}
+      bg="footerBg"
+      color="textSecondary"
+      borderTopWidth="1px"
+      borderColor="borderSubtle"
+      px={4}
+      py={5}
       textAlign="center"
-      borderTop="1px solid"
-      borderColor="gray.700"
     >
-      <Text textAlign="center">
-        <Text as="span" fontWeight="bold" color="teal.400">
+      <Text fontSize="sm">
+        <Text as="span" fontWeight="700" color="accent.500" letterSpacing="0.02em">
           Five Innings
         </Text>{" "}
-        - © {new Date().getFullYear()} All Rights Reserved | Made by{" "}
+        © {new Date().getFullYear()} | Built by{" "}
         <Link
           href="https://www.linkedin.com/in/brianzan/"
           isExternal
-          color="teal.400"
-          fontWeight="bold"
+          color="brand.500"
+          fontWeight="700"
+          _hover={{ color: "accent.500" }}
         >
           Brian Zanoni
         </Link>

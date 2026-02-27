@@ -25,7 +25,6 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../api/axiosInstance';
 import type { PlayerStats as PlayerSeasonStats } from './interface';
-import { THEME } from '../../constants';
 import { MdAccessTime, MdSportsBaseball, MdPerson, MdTrendingUp } from 'react-icons/md';
 import { FaBaseballBatBall } from 'react-icons/fa6';
 import TeamLogo from '../TeamLogo/TeamLogo';
@@ -107,7 +106,7 @@ const HittingStats: React.FC<HittingStatsProps> = ({ stats, season, onSeasonChan
                     bg="gray.700"
                     color="white"
                     borderColor="gray.600"
-                    focusBorderColor={THEME.colors.accent}
+                    focusBorderColor="accent.500"
                     maxW="180px"
                     size="sm"
                     borderRadius="md"
@@ -164,7 +163,7 @@ const PitchingStats: React.FC<PitchingStatsProps> = ({ stats, seasonYear, onSeas
                         bg="gray.700"
                         color="white"
                         borderColor="gray.600"
-                        focusBorderColor={THEME.colors.accent}
+                        focusBorderColor="accent.500"
                         maxW="180px"
                         size="sm"
                         borderRadius="md"
@@ -263,7 +262,6 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
     }, [stats, onTeamIdSet]);
 
     const playerType = playerInfo?.position === 'P' ? 'Pitcher' : (playerInfo?.position === 'TWP' ? 'TWP' : 'Hitter');
-    const gameLogPlayerType = playerType === 'Pitcher' ? 'Pitcher' : 'Hitter';
 
     const renderPlayerTypeStats = () => {
         if (isLoadingInfo) {
@@ -436,7 +434,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                                         boxSize={{ base: "100px", md: "120px" }}
                                         objectFit="cover"
                                         border="3px solid"
-                                        borderColor={THEME.colors.accent}
+                                        borderColor="accent.500"
                                     />
                                     <VStack 
                                         align={{ base: "center", md: "start" }}
@@ -479,7 +477,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({ playerId, season, onTeamIdSet
                                 bg="gray.700"
                                 color="white"
                                 borderColor="gray.600"
-                                focusBorderColor={THEME.colors.accent}
+                                focusBorderColor="accent.500"
                                 maxW="180px"
                                 size="sm"
                                 borderRadius="md"

@@ -3,7 +3,7 @@ const DISABLE_ANALYTICS = import.meta.env.VITE_DISABLE_ANALYTICS === 'true';
 
 declare global {
     interface Window {
-        gtag: (...args: any[]) => void;
+        gtag: (...args: unknown[]) => void;
     }
 }
 
