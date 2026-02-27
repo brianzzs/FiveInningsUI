@@ -150,7 +150,7 @@ const PlayerPage: React.FC = () => {
         ) : (
           <>
             <SectionCard>
-              <Tabs variant="line" colorScheme="accent">
+              <Tabs variant="line" colorScheme="accent" isLazy lazyBehavior="keepMounted">
                 <TabList>
                   <Tab>Player Stats</Tab>
                   <Tab>Betting Analysis</Tab>
